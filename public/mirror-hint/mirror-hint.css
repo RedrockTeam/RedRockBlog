@@ -1,0 +1,106 @@
+:root {
+  --mh-bg: rgba(17, 17, 17, 0.92);
+  --mh-fg: #eee;
+  --mh-accent: #f5c518;
+}
+
+.mh-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translate(-50%, 20px);
+  z-index: 2147483000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(92vw, 480px);
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--mh-bg);
+  color: var(--mh-fg);
+  font: 14px/1.5 system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s, transform 0.18s;
+}
+
+.mh-toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+
+.mh-toast a {
+  color: var(--mh-accent);
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mh-badge {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2147483000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--mh-bg);
+  color: var(--mh-fg);
+  font: 12px/1.4 system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+  opacity: 1;
+  transition: opacity 0.4s;
+}
+
+.mh-badge.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mh-badge a {
+  color: var(--mh-accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.mh-badge .mh-close {
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px;
+}
+
+.mh-comment-card {
+  margin-top: 8px;
+  padding: 16px;
+  border: 1px dashed rgba(128, 128, 128, 0.45);
+  border-radius: 12px;
+  text-align: center;
+  font: 14px/1.6 system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #444;
+}
+
+.mh-comment-card .mh-btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--mh-accent, #f5c518);
+  color: #111 !important;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+@media (prefers-color-scheme: dark) {
+  .mh-comment-card {
+    color: #bbb;
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+}

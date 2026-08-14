@@ -1,0 +1,17 @@
+{
+  "name": "redrock-blog",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "mirror": "node scripts/mirror.mjs",
+    "validate:channels": "node scripts/validate-channels.mjs"
+  },
+  "dependencies": {
+    "astro": "^5.0.0",
+    "cheerio": "^1.0.0"
+  }
+}
