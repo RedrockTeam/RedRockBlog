@@ -14,12 +14,13 @@
       "description": "Rycarl 的小博客",
       "extraOrigins": ["https://image.rycarl.cn:443"],
       "alwaysFetch": ["/links"],
-      "extraAssets": [
-        {
-          "url": "https://image.rycarl.cn:443/pic/compressed-compressed-炎夏凉梦-横屏4K.mp4",
-          "path": "upload/dynamic-wallpaper.mp4"
-        }
-      ],
+      "enabled": true
+    },
+    {
+      "id": "sfkm",
+      "name": "Snowykami's Blog",
+      "url": "https://blog.sfkm.me/",
+      "description": "SnowyKami 的博客（neo-blog）",
       "enabled": true
     }
   ]

@@ -9,21 +9,109 @@ const REMOVE_SCRIPT_RE =
 const INLINE_REMOVE_RE = /\/plugins\/(PluginCommentWidget|PluginSearchWidget)/;
 const KNOWN_ROOT_RE =
   /(["'])\/(upload|themes|plugins|archives|tags|categories|links|pages|images|search|rss|sitemap|favicon|about-me|met-website)\/([^"'\s\\]*)/g;
-// 部分友站会把图片/头像放在独立图床，镜像不抓跨域资源，
-// 需要把这些来源加进 img-src 白名单，页面才能正常显示图片。
+
+// 媒体/字体文件扩展名：这些资源不再下载，引用一律直链原站绝对 URL
+export const MEDIA_EXT_RE =
+  /\.(?:png|jpe?g|webp|gif|svg|ico|avif|bmp|apng|mp4|webm|ogv|mov|mp3|wav|ogg|oga|flac|aac|m4a|woff2?|ttf|otf|eot)(?:[?#]|$)/i;
+
+// 已知非媒体扩展名：这类文件不做魔数探测（避免误删 sitemap.xml 等文本文件）
+export const SAFE_FILE_RE =
+  /\.(?:html?|css|js|json|xml|txt|md|yml|yaml|map|webmanifest|gz|zip|pdf)(?:[?#]|$)/i;
+
+// 部分友站用无扩展名的 URL 提供图片/视频（如 /api/v1/file/f/1），
+// 按文件头魔数识别并删除，通用兜底所有站点。
+const MEDIA_MAGIC = [
+  [0x89, 0x50, 0x4e, 0x47], // PNG
+  [0xff, 0xd8, 0xff], // JPEG
+  [0x47, 0x49, 0x46, 0x38], // GIF
+  [0x52, 0x49, 0x46, 0x46], // RIFF（WEBP/AVIF）
+  [0x1a, 0x45, 0xdf, 0xa3], // WebM/Matroska
+  [0x49, 0x44, 0x33], // MP3（ID3）
+  [0x4f, 0x67, 0x67, 0x53], // Ogg
+  [0x00, 0x01, 0x00, 0x00], // TTF
+  [0x4f, 0x54, 0x54, 0x4f], // OTF（OTTO）
+  [0x00, 0x00, 0x01, 0x00], // ICO
+  [0x42, 0x4d], // BMP
+  [0x49, 0x49, 0x2a, 0x00], // TIFF LE
+  [0x4d, 0x4d, 0x00, 0x2a], // TIFF BE
+  [0x77, 0x4f, 0x46, 0x46], // WOFF
+  [0x77, 0x4f, 0x46, 0x32], // WOFF2
+];
+
+export async function looksLikeMedia(file) {
+  try {
+    const fh = await open(file, 'r');
+    const buf = Buffer.alloc(32);
+    const { bytesRead } = await fh.read(buf, 0, 32, 0);
+    await fh.close();
+    const b = buf.subarray(0, bytesRead);
+    if (bytesRead < 4) return false;
+    for (const magic of MEDIA_MAGIC) {
+      if (b.length >= magic.length && magic.every((byte, i) => b[i] === byte)) return true;
+    }
+    // MP4/M4V：偏移 4 处为 ftyp 魔数（盒子大小可变，不能用固定字节序列）
+    if (b.length >= 8 && b.subarray(4, 8).toString('latin1') === 'ftyp') return true;
+    const head = b.toString('latin1').trimStart();
+    return /^<svg[\s>]/i.test(head);
+  } catch {
+    return false;
+  }
+}
+
+// 这些标签的 src 属性内容必定是媒体（即使 URL 无扩展名，如 Next.js /_next/image?...）
+const MEDIA_SRC_TAGS = new Set(['img', 'video', 'audio', 'source', 'embed', 'track', 'image']);
+
+function isMediaRef(value) {
+  if (typeof value !== 'string') return false;
+  try {
+    return MEDIA_EXT_RE.test(new URL(value, 'http://x').pathname);
+  } catch {
+    return false;
+  }
+}
+
+function originNoSlash(origin) {
+  return (origin || '').replace(/\/$/, '');
+}
+
+// 镜像内相对路径 -> 原站目录（用于把相对媒体引用解析回原站绝对 URL）
+function originDirOf(rel) {
+  const dir = path.posix.dirname(rel.split(path.sep).join('/'));
+  return dir === '.' ? '/' : `/${dir}/`;
+}
+
 function buildCsp(extraOrigins = []) {
-  const img = ["'self'", "'data:'", ...extraOrigins].join(' ');
-  const media = ["'self'", ...extraOrigins].join(' ');
-  return `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src ${img}; font-src 'self' data:; media-src ${media}; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'`;
+  // 媒体不再镜像，img/video/audio/font 一律直链原站，放开 https；
+  // 脚本/连接仍保持收紧（script-src 'self'、connect-src 'none'）
+  const img = ["'self'", "'data:'", "https:", ...extraOrigins].join(' ');
+  const media = ["'self'", "https:", ...extraOrigins].join(' ');
+  const font = ["'self'", "data:", "https:", ...extraOrigins].join(' ');
+  return `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src ${img}; font-src ${font}; media-src ${media}; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'`;
 }
 
 function escapeRegExp(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function rewriteRoot(value, prefix, origin) {
+function rewriteRoot(value, prefix, origin, { media = false, baseDir = '/' } = {}) {
   if (typeof value !== 'string') return value;
   const clean = value.replace(/\?width=[^&]*/, '');
+  // 媒体引用：一律改写为原站绝对 URL（根相对/协议相对/站内相对 → 绝对；绝对 URL 原样保留）
+  if (media) {
+    if (clean.startsWith('/') && !clean.startsWith('//')) {
+      return `${originNoSlash(origin)}${clean}`;
+    }
+    if (clean.startsWith('//')) return `https:${clean}`;
+    if (/^[a-z][a-z0-9+.-]*:/i.test(clean)) return clean;
+    if (origin) {
+      try {
+        return new URL(clean, `${originNoSlash(origin)}${baseDir}`).href;
+      } catch {
+        return clean;
+      }
+    }
+    return clean;
+  }
   if (clean.startsWith('/') && !clean.startsWith('//')) {
     return prefix + clean;
   }
@@ -49,11 +137,12 @@ function rewriteAssetExt(value) {
     : value;
 }
 
-function cleanRef(value, prefix, origin) {
+function cleanRef(value, prefix, origin, opts = {}) {
   if (typeof value !== 'string') return value;
-  let v = rewriteAssetExt(rewriteRoot(value, prefix, origin));
+  let v = rewriteAssetExt(rewriteRoot(value, prefix, origin, opts));
   // wget 把含查询串的资源存成字面 "?":main.css?v=1.0.6，引用需编码为 %3F，
-  // 否则浏览器把 ? 当查询串、按 main.css 找文件 → 404（页面白屏）
+  // 否则浏览器把 ? 当查询串、按 main.css 找文件 → 404（页面白屏）。
+  // 绝对 URL（含媒体直链）保持真实查询串，不编码。
   if (!/^(https?:)?\/\//i.test(v)) v = v.replace(/\?/g, '%3F');
   return v;
 }
@@ -77,13 +166,13 @@ function resolveLocalPath(pathname, outDir) {
   return null;
 }
 
-function rewriteSrcset(value, prefix, origin) {
+function rewriteSrcset(value, prefix, origin, baseDir) {
   return value
     .split(',')
     .map((part) => {
       const m = part.trim().match(/^(\S+)(\s+.+)?$/);
       if (!m) return part;
-      return cleanRef(m[1], prefix, origin) + (m[2] ?? '');
+      return cleanRef(m[1], prefix, origin, { media: true, baseDir }) + (m[2] ?? '');
     })
     .join(', ');
 }
@@ -113,32 +202,58 @@ async function looksLikeHtml(file) {
   }
 }
 
-function rewriteJsonStrings(node, prefix, origin) {
+function rewriteJsonStrings(node, prefix, origin, baseDir) {
   if (typeof node === 'string') {
-    return cleanRef(node, prefix, origin);
+    return cleanRef(node, prefix, origin, { media: isMediaRef(node), baseDir });
   }
   if (Array.isArray(node)) {
-    return node.map((v) => rewriteJsonStrings(v, prefix, origin));
+    return node.map((v) => rewriteJsonStrings(v, prefix, origin, baseDir));
   }
   if (node && typeof node === 'object') {
     const out = {};
-    for (const [k, v] of Object.entries(node)) out[k] = rewriteJsonStrings(v, prefix, origin);
+    for (const [k, v] of Object.entries(node)) out[k] = rewriteJsonStrings(v, prefix, origin, baseDir);
     return out;
   }
   return node;
 }
 
-function rewriteCssUrls(css, prefix, origin) {
-  // 根相对路径 url(/upload/...)
-  css = css.replace(/(url\(\s*['"]?)\//g, `$1${prefix}/`);
-  // 同源绝对路径 url(https://原站/upload/...)
-  if (origin) {
-    const o = origin.replace(/\/$/, '');
-    css = css.replace(new RegExp(`(url\\(\\s*['"]?)${escapeRegExp(o)}`, 'g'), `$1${prefix}`);
-  }
-  // 去掉 .gz 后缀的引用（镜像内只有未压缩版）
-  css = css.replace(/(url\(\s*['"]?)([^)'"]+)/g, (m, pre, p) => pre + rewriteAssetExt(p));
-  return css;
+function rewriteCssUrls(css, prefix, origin, cssDir = '/') {
+  const o = originNoSlash(origin);
+  return css.replace(/url\(\s*['"]?([^'")]+)['"]?\s*\)/g, (m, p) => {
+    const target = p.trim();
+    // data: 与函数式 url() 原样保留
+    if (/^data:/i.test(target) || target.includes('(')) return m;
+    const media = isMediaRef(target);
+    if (target.startsWith('/') && !target.startsWith('//')) {
+      return `url(${media ? o + target : prefix + target})`;
+    }
+    if (target.startsWith('//')) {
+      return `url(${media ? 'https:' + target : target})`;
+    }
+    if (/^https?:/i.test(target)) {
+      if (origin) {
+        try {
+          const u = new URL(target, origin);
+          if (u.origin === new URL(origin).origin) {
+            return `url(${media ? target : prefix + u.pathname + (u.search || '')})`;
+          }
+        } catch {
+          // 解析失败则原样保留
+        }
+      }
+      return `url(${target})`;
+    }
+    // 相对路径：媒体按 CSS 所在站内目录解析为原站绝对 URL；资源保持相对（本地文件同构）
+    if (media && origin) {
+      try {
+        return `url(${new URL(target, o + cssDir).href})`;
+      } catch {
+        return `url(${target})`;
+      }
+    }
+    // 去掉 .gz 后缀的引用（镜像内只有未压缩版）
+    return `url(${rewriteAssetExt(target)})`;
+  });
 }
 
 // 部分友站对 CSS/JS 下发的是 gzip 字节（Content-Encoding: gzip），
@@ -195,7 +310,7 @@ async function listFiles(dir) {
   return out;
 }
 
-async function sanitizeHtml(file, { origin, prefix, base, outDir, extraOrigins = [], assetMap = {} }) {
+async function sanitizeHtml(file, { origin, prefix, base, outDir, extraOrigins = [], pageDir = '/' }) {
   let html = await readFile(file, 'utf8');
   const $ = load(html, { decodeEntities: false });
   let faviconPath = null;
@@ -218,17 +333,32 @@ async function sanitizeHtml(file, { origin, prefix, base, outDir, extraOrigins =
 
   $('[href]').each((_, el) => {
     const v = $(el).attr('href');
-    // <a> 链接由下方专门的同源解析逻辑处理，避免把外站/未镜像链接误改成本地 404
-    const nv = cleanRef(v, prefix, (el.tagName || '').toLowerCase() === 'a' ? null : origin);
+    const tag = (el.tagName || '').toLowerCase();
+    if (tag === 'a') {
+      // <a> 链接由下方专门的同源解析逻辑处理；指向媒体文件的链接直链原站
+      if (isMediaRef(v)) {
+        const nv = cleanRef(v, prefix, origin, { media: true, baseDir: pageDir });
+        if (nv !== v) $(el).attr('href', nv);
+      } else {
+        const nv = cleanRef(v, prefix, null);
+        if (nv !== v) $(el).attr('href', nv);
+      }
+      return;
+    }
+    const rel = ($(el).attr('rel') || '').toLowerCase();
+    const media = (tag === 'link' && rel.includes('icon')) || isMediaRef(v);
+    const nv = cleanRef(v, prefix, origin, { media, baseDir: pageDir });
     if (nv !== v) $(el).attr('href', nv);
   });
   $('[src]').each((_, el) => {
     const v = $(el).attr('src');
-    const nv = cleanRef(v, prefix, origin);
+    const tag = (el.tagName || '').toLowerCase();
+    const media = MEDIA_SRC_TAGS.has(tag) || isMediaRef(v);
+    const nv = cleanRef(v, prefix, origin, { media, baseDir: pageDir });
     if (nv !== v) $(el).attr('src', nv);
     // 音乐组件等会把专辑封面误写成页面地址（xxx.html），
     // 转成透明占位图，避免满页破图图标
-    if ((el.tagName || '').toLowerCase() === 'img' && /\.html?$/i.test(nv || '')) {
+    if (tag === 'img' && /\.html?$/i.test(nv || '')) {
       $(el).attr(
         'src',
         'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
@@ -236,7 +366,12 @@ async function sanitizeHtml(file, { origin, prefix, base, outDir, extraOrigins =
     }
   });
   $('[srcset]').each((_, el) => {
-    $(el).attr('srcset', rewriteSrcset($(el).attr('srcset'), prefix, origin));
+    $(el).attr('srcset', rewriteSrcset($(el).attr('srcset'), prefix, origin, pageDir));
+  });
+  $('[poster]').each((_, el) => {
+    const v = $(el).attr('poster');
+    const nv = cleanRef(v, prefix, origin, { media: true, baseDir: pageDir });
+    if (nv !== v) $(el).attr('poster', nv);
   });
   // 同源绝对链接改写为镜像本地路径（点击后仍在 iframe 内导航）；
   // 外站或找不到本地文件的链接一律新标签打开，避免跨域导航被 X-Frame-Options
@@ -259,6 +394,13 @@ async function sanitizeHtml(file, { origin, prefix, base, outDir, extraOrigins =
       return;
     }
     if (url.origin === channelOrigin) {
+      // 媒体文件（图片/视频等）未镜像到本地，直链原站并在新标签打开，避免本地 404
+      if (isMediaRef(url.pathname)) {
+        $(el).attr('href', url.href);
+        $(el).attr('target', '_blank');
+        $(el).attr('rel', 'noopener');
+        return;
+      }
       const resolved = resolveLocalPath(url.pathname, outDir);
       if (resolved) {
         $(el).attr('href', `${prefix}/${resolved}`);
@@ -270,7 +412,8 @@ async function sanitizeHtml(file, { origin, prefix, base, outDir, extraOrigins =
   });
   $('[data-src]').each((_, el) => {
     const v = $(el).attr('data-src');
-    const nv = cleanRef(v, prefix, origin);
+    const tag = (el.tagName || '').toLowerCase();
+    const nv = cleanRef(v, prefix, origin, { media: tag === 'img' || isMediaRef(v), baseDir: pageDir });
     if (nv !== v) $(el).attr('data-src', nv);
   });
   $('[action]').each((_, el) => {
@@ -280,12 +423,20 @@ async function sanitizeHtml(file, { origin, prefix, base, outDir, extraOrigins =
   });
   $('meta[property^="og:"], meta[name^="twitter:"]').each((_, el) => {
     const v = $(el).attr('content');
-    const nv = cleanRef(v, prefix, origin);
+    const key = ($(el).attr('property') || $(el).attr('name') || '').toLowerCase();
+    const media =
+      key === 'og:image' ||
+      key === 'og:image:url' ||
+      key === 'og:image:secure_url' ||
+      key === 'twitter:image' ||
+      key === 'twitter:image:src' ||
+      isMediaRef(v);
+    const nv = cleanRef(v, prefix, origin, { media, baseDir: pageDir });
     if (nv !== v) $(el).attr('content', nv);
   });
   $('[style]').each((_, el) => {
     const v = $(el).attr('style') || '';
-    const nv = rewriteCssUrls(v, prefix, origin);
+    const nv = rewriteCssUrls(v, prefix, origin, pageDir);
     if (nv !== v) $(el).attr('style', nv);
   });
 
@@ -299,7 +450,7 @@ async function sanitizeHtml(file, { origin, prefix, base, outDir, extraOrigins =
   $('script[type="application/json"]').each((_, el) => {
     const raw = $(el).text();
     try {
-      const data = rewriteJsonStrings(JSON.parse(raw), prefix, origin);
+      const data = rewriteJsonStrings(JSON.parse(raw), prefix, origin, pageDir);
       $(el).text(JSON.stringify(data));
     } catch {
       // 非 JSON 原样保留
@@ -316,23 +467,24 @@ async function sanitizeHtml(file, { origin, prefix, base, outDir, extraOrigins =
   }
 
   html = $.html();
-  // 镜像到本地的外站资源（如动态壁纸视频）：把原站地址精确替换为本地副本，
-  // 保持原页面结构与主题配置不变（type 仍为 video，<video> 元素原样保留）
-  for (const [from, to] of Object.entries(assetMap)) {
-    if (html.includes(from)) html = html.split(from).join(to);
-  }
   // 处理内联 <script> 中带引号的根绝对路径（themeConfig 等），
   // 只改脚本内容（保留 <script> 外壳），避免误伤文章正文里的路径示例
   html = html.replace(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi, (m, attrs, body) =>
-    `<script${attrs}>${body.replace(KNOWN_ROOT_RE, (sub, q, dir, rest) => `${q}${prefix}/${dir}/${rewriteAssetExt(rest)}`)}</script>`,
+    `<script${attrs}>${body.replace(
+      KNOWN_ROOT_RE,
+      (sub, q, dir, rest) =>
+        isMediaRef(`/${dir}/${rest}`)
+          ? `${q}${originNoSlash(origin)}/${dir}/${rest.replace(/\?width=[^&]*/, '')}`
+          : `${q}${prefix}/${dir}/${rewriteAssetExt(rest)}`,
+    )}</script>`,
   );
   await writeFile(file, html, 'utf8');
   return faviconPath;
 }
 
-async function sanitizeCss(file, prefix, origin) {
+async function sanitizeCss(file, prefix, origin, cssDir) {
   let css = await readFile(file, 'utf8');
-  css = rewriteCssUrls(css, prefix, origin);
+  css = rewriteCssUrls(css, prefix, origin, cssDir);
   await writeFile(file, css, 'utf8');
 }
 
@@ -340,11 +492,17 @@ async function sanitizeJs(file, prefix, origin) {
   let js = await readFile(file, 'utf8');
   js = js.replace(
     KNOWN_ROOT_RE,
-    (m, q, dir, rest) => `${q}${prefix}/${dir}/${rewriteAssetExt(rest)}`,
+    (m, q, dir, rest) =>
+      isMediaRef(`/${dir}/${rest}`)
+        ? `${q}${originNoSlash(origin)}/${dir}/${rest.replace(/\?width=[^&]*/, '')}`
+        : `${q}${prefix}/${dir}/${rewriteAssetExt(rest)}`,
   );
-  // 内联/外链 JS 里的同源绝对地址（如 themeConfig 中的 /upload/...）也改为本地路径
+  // 内联/外链 JS 里的同源绝对地址：媒体保持原站直链，资源（CSS/JS/页面）改为本地路径
   if (origin) {
-    js = js.split(origin.replace(/\/$/, '')).join(prefix);
+    const o = originNoSlash(origin);
+    js = js.replace(new RegExp(escapeRegExp(o) + '(/[^"\'\\s\\\\]*)', 'g'), (m, p) =>
+      isMediaRef(p) ? m : prefix + p,
+    );
   }
   await writeFile(file, js, 'utf8');
 }
@@ -357,41 +515,36 @@ export async function sanitizeChannel({
   prefix,
   base,
   extraOrigins = [],
-  extraAssets = [],
 }) {
   await rm(outDir, { recursive: true, force: true });
   await mkdir(outDir, { recursive: true });
   await copyTree(hostDir, outDir);
   await decompressGzAssets(outDir);
 
-  // 已成功镜像到本地的外站资源：url -> 本地路径（只映射真实存在的文件）
-  const assetMap = {};
-  for (const asset of extraAssets) {
-    if (!asset?.url || !asset?.path || asset.path.includes('..')) continue;
-    if (existsSync(path.join(outDir, asset.path))) {
-      assetMap[asset.url] = `${prefix}/${asset.path}`;
-    }
-  }
-
   const files = await listFiles(outDir);
   let faviconPath = null;
 
   for (const file of files) {
     const rel = path.relative(outDir, file);
-    if (rel.includes('?width=')) {
+    if (
+      rel.includes('?width=') ||
+      MEDIA_EXT_RE.test(rel) ||
+      (!SAFE_FILE_RE.test(rel) && (await looksLikeMedia(file)))
+    ) {
       await rm(file, { force: true });
       continue;
     }
+    const pageDir = originDirOf(rel);
     const isHtml =
       rel.endsWith('.html') ||
       (!/\.(css|js|png|jpe?g|webp|gif|svg|ico|woff2?|ttf|otf|eot|json|xml|txt|gz|zip|pdf|mp3|mp4|webm)$/i.test(rel) &&
         (await looksLikeHtml(file)));
     if (isHtml) {
       faviconPath =
-        (await sanitizeHtml(file, { origin, prefix, base, outDir, extraOrigins, assetMap })) ||
+        (await sanitizeHtml(file, { origin, prefix, base, outDir, extraOrigins, pageDir })) ||
         faviconPath;
     } else if (rel.endsWith('.css')) {
-      await sanitizeCss(file, prefix, origin);
+      await sanitizeCss(file, prefix, origin, pageDir);
     } else if (rel.endsWith('.js')) {
       await sanitizeJs(file, prefix, origin);
     }

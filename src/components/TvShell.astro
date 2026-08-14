@@ -23,6 +23,7 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 
   <div class="controls">
     <button class="ctl" id="prev" type="button" aria-label="上一个频道">◀</button>
+    <span class="channel-no" id="channel-no">CH-01</span>
     <button class="ctl" id="next" type="button" aria-label="下一个频道">▶</button>
     <label class="jump">
       跳转到
@@ -187,6 +188,15 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
     opacity: 0.35;
     cursor: not-allowed;
   }
+  .channel-no {
+    flex: 0 0 64px;
+    width: 64px;
+    text-align: center;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
   .nav-group {
     display: flex;
     align-items: center;
@@ -289,6 +299,7 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
   const screen = document.getElementById('screen');
   const crt = document.getElementById('crt');
   const crtCh = document.getElementById('crt-ch');
+  const channelNo = document.getElementById('channel-no');
   const chipsEl = document.getElementById('chips');
   const jumpEl = document.getElementById('jump');
   const currentLabel = document.getElementById('current-label');
@@ -320,7 +331,8 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
     setActive(id);
     const target = `${BASE}channels/${id}/`;
     const name = channels[indexOf(id)].name;
-    currentLabel.textContent = `${labelOf(id)} · ${name}`;
+    channelNo.textContent = labelOf(id);
+    currentLabel.textContent = name;
     jumpEl.value = id;
     if (screen.dataset.loaded !== id) {
       crtCh.textContent = labelOf(id);
