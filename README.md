@@ -33,4 +33,4 @@ npm run dev          # 本地预览
 
 ## 部署
 
-`mirror.yml` 每天 03:00 UTC 定时镜像并部署到 GitHub Pages，也支持 `workflow_dispatch` 手动触发。仓库需在 Settings → Pages 中启用 GitHub Actions 作为发布源。
+`mirror.yml` 在推送到 `main` 时、每天 03:00 UTC 定时、以及 `workflow_dispatch` 手动触发时，都会执行镜像拉取并部署到 GitHub Pages。仓库需在 Settings → Pages 中启用 GitHub Actions 作为发布源。
