@@ -15,6 +15,8 @@ npm run dev          # 本地预览
 
 镜像默认不下载 Halo 的 `?width=` 缩略图变体（静态托管下无收益），页面 `srcset` 会自动收敛到原图；多频道并发抓取（最多 3 路）。
 
+增量同步：有状态后按 `sitemap.xml` 的 `lastmod` 对比，只拉新增/更新的文章页，源站删除的页面会同步删除；首页与归档列表始终刷新；首次运行或 sitemap 不可用时自动回退全量抓取。状态文件在 `.cache/state/`，随 Actions 缓存保留。
+
 ## 友链申请（PR）
 
 编辑 `src/data/channels.json`，在 `channels` 数组中新增一项：

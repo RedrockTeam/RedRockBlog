@@ -2,7 +2,7 @@
 import channelsData from '../data/channels.json';
 
 const channels = channelsData.channels.filter((c) => c.enabled !== false);
-const BASE = import.meta.env.BASE_URL;
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 ---
 
 <div class="tv" id="tv" tabindex="0">
@@ -267,7 +267,7 @@ const BASE = import.meta.env.BASE_URL;
 
 <script define:vars={{ channels }}>
   const tvEl = document.getElementById('tv');
-  const BASE = import.meta.env.BASE_URL;
+  const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
   const screen = document.getElementById('screen');
   const crt = document.getElementById('crt');
   const crtCh = document.getElementById('crt-ch');
