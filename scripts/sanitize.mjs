@@ -137,6 +137,14 @@ function rewriteAssetExt(value) {
     : value;
 }
 
+// wget -E 会把带查询串的 text/css 文件存成 "xxx.css?query.css"（查询串保留在文件名里），
+// 本地引用需补上 .css 后缀才能命中文件；否则部署后 CSS 404、页面无样式、排版塌掉。
+// JS 没有此问题（wget 只为 text/html、text/css 追加扩展名）。
+function localizeRef(v) {
+  if (/\.css%3[fF]/.test(v) && !/\.css$/i.test(v)) v += '.css';
+  return v;
+}
+
 function cleanRef(value, prefix, origin, opts = {}) {
   if (typeof value !== 'string') return value;
   let v = rewriteAssetExt(rewriteRoot(value, prefix, origin, opts));
@@ -144,7 +152,7 @@ function cleanRef(value, prefix, origin, opts = {}) {
   // 否则浏览器把 ? 当查询串、按 main.css 找文件 → 404（页面白屏）。
   // 绝对 URL（含媒体直链）保持真实查询串，不编码。
   if (!/^(https?:)?\/\//i.test(v)) v = v.replace(/\?/g, '%3F');
-  return v;
+  return localizeRef(v);
 }
 
 // 把原站绝对链接的路径解析为镜像里真实存在的相对文件（与 wget -E 落盘规则一致）
@@ -225,7 +233,8 @@ function rewriteCssUrls(css, prefix, origin, cssDir = '/') {
     if (/^data:/i.test(target) || target.includes('(')) return m;
     const media = isMediaRef(target);
     if (target.startsWith('/') && !target.startsWith('//')) {
-      return `url(${media ? o + target : prefix + target})`;
+      if (media) return `url(${o + target})`;
+      return `url(${localizeRef((prefix + target).replace(/\?/g, '%3F'))})`;
     }
     if (target.startsWith('//')) {
       return `url(${media ? 'https:' + target : target})`;
@@ -235,7 +244,8 @@ function rewriteCssUrls(css, prefix, origin, cssDir = '/') {
         try {
           const u = new URL(target, origin);
           if (u.origin === new URL(origin).origin) {
-            return `url(${media ? target : prefix + u.pathname + (u.search || '')})`;
+            if (media) return `url(${target})`;
+            return `url(${localizeRef((prefix + u.pathname + (u.search || '')).replace(/\?/g, '%3F'))})`;
           }
         } catch {
           // 解析失败则原样保留
@@ -252,7 +262,7 @@ function rewriteCssUrls(css, prefix, origin, cssDir = '/') {
       }
     }
     // 去掉 .gz 后缀的引用（镜像内只有未压缩版）
-    return `url(${rewriteAssetExt(target)})`;
+    return `url(${localizeRef(rewriteAssetExt(target).replace(/\?/g, '%3F'))})`;
   });
 }
 
