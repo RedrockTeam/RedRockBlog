@@ -1,0 +1,68 @@
+---
+import '../styles/global.css';
+const BASE = import.meta.env.BASE_URL;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RedRock</title>
+  </head>
+  <body>
+    <header class="nav">
+      <span class="logo">RedRock</span>
+      <nav>
+        <a href={`${BASE}tv/`}>友链电视</a>
+      </nav>
+    </header>
+    <main class="hero">
+      <h1>RedRock 友链电视</h1>
+      <p>把友链博客镜像成一个个频道，像调台一样快速浏览。</p>
+      <a class="cta" href={`${BASE}tv/`}>打开电视</a>
+    </main>
+    <style>
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--border);
+      }
+      .logo {
+        font-weight: 800;
+        letter-spacing: 1px;
+      }
+      .nav nav a {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .nav nav a:hover {
+        color: var(--accent);
+      }
+      .hero {
+        max-width: 720px;
+        margin: 15vh auto 0;
+        padding: 0 24px;
+        text-align: center;
+      }
+      .hero h1 {
+        font-size: 40px;
+        letter-spacing: 1px;
+      }
+      .hero p {
+        margin: 16px 0 28px;
+        color: var(--muted);
+      }
+      .cta {
+        display: inline-block;
+        padding: 12px 28px;
+        border-radius: 999px;
+        background: var(--accent);
+        color: #111;
+        font-weight: 700;
+      }
+    </style>
+  </body>
+</html>

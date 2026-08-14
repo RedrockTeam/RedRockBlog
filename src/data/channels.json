@@ -1,0 +1,18 @@
+{
+  "channels": [
+    {
+      "id": "met6",
+      "name": "MeT-Blog",
+      "url": "https://blog.met6.top:444/",
+      "description": "MeTerminator 的个人博客",
+      "enabled": true
+    },
+    {
+      "id": "rycarl",
+      "name": "Rycarl's little blog",
+      "url": "http://blog.rycarl.cn/",
+      "description": "Rycarl 的小博客",
+      "enabled": true
+    }
+  ]
+}
