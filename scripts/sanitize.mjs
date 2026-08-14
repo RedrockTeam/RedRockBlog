@@ -31,6 +31,25 @@ function cleanRef(value, prefix) {
   return rewriteAssetExt(rewriteRoot(value, prefix));
 }
 
+// 把原站绝对链接的路径解析为镜像里真实存在的相对文件（与 wget -E 落盘规则一致）
+function resolveLocalPath(pathname, outDir) {
+  let decoded;
+  try {
+    decoded = decodeURIComponent(pathname.split('?')[0]);
+  } catch {
+    decoded = pathname.split('?')[0];
+  }
+  let rel = decoded.replace(/^\//, '');
+  if (decoded.endsWith('/')) rel += 'index';
+  const candidates = [rel];
+  if (!rel.endsWith('.html') && !rel.endsWith('.htm')) candidates.push(`${rel}.html`);
+  candidates.push(path.posix.join(rel, 'index.html'));
+  for (const c of candidates) {
+    if (c && existsSync(path.join(outDir, c))) return c;
+  }
+  return null;
+}
+
 function rewriteSrcset(value, prefix) {
   return value
     .split(',')
@@ -135,6 +154,29 @@ async function sanitizeHtml(file, { origin, prefix, base, outDir }) {
   });
   $('[srcset]').each((_, el) => {
     $(el).attr('srcset', rewriteSrcset($(el).attr('srcset'), prefix));
+  });
+  // 同源绝对链接改写为镜像本地路径（点击后仍在 iframe 内导航）；
+  // 外站或找不到本地文件的链接一律新标签打开，避免跨域导航被 X-Frame-Options
+  // 拦成白屏、并让电视壳的返回/前进/刷新因跨域安全限制而失效
+  const channelOrigin = new URL(origin).origin;
+  $('a[href]').each((_, el) => {
+    const href = $(el).attr('href');
+    if (typeof href !== 'string' || !/^(https?:)?\/\//i.test(href)) return;
+    let url;
+    try {
+      url = new URL(href, origin);
+    } catch {
+      return;
+    }
+    if (url.origin === channelOrigin) {
+      const resolved = resolveLocalPath(url.pathname, outDir);
+      if (resolved) {
+        $(el).attr('href', `${prefix}/${resolved}`);
+        return;
+      }
+    }
+    $(el).attr('target', '_blank');
+    $(el).attr('rel', 'noopener');
   });
   $('[data-src]').each((_, el) => {
     const v = $(el).attr('data-src');
