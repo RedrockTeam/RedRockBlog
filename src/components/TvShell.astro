@@ -1,0 +1,384 @@
+---
+import channelsData from '../data/channels.json';
+
+const channels = channelsData.channels.filter((c) => c.enabled !== false);
+const BASE = import.meta.env.BASE_URL;
+---
+
+<div class="tv" id="tv" tabindex="0">
+  <ul class="chips" id="chips">
+    {channels.map((c) => (
+      <li class="chip">
+        <button class="chip-btn" data-id={c.id} type="button">
+          <span class="avatar">
+            <img src={`${BASE}channels/${c.id}/favicon.ico`} alt="" loading="lazy" />
+            <span class="avatar-fallback">{c.name.charAt(0)}</span>
+          </span>
+          <span class="chip-name">{c.name}</span>
+        </button>
+        <a class="origin" href={c.url} target="_blank" rel="noopener" title="访问原站">原站 ↗</a>
+      </li>
+    ))}
+  </ul>
+
+  <div class="controls">
+    <button class="ctl" id="prev" type="button" aria-label="上一个频道">◀</button>
+    <span class="current" id="current-label">CH-01</span>
+    <button class="ctl" id="next" type="button" aria-label="下一个频道">▶</button>
+    <label class="jump">
+      跳转到
+      <select id="jump">
+        {channels.map((c, i) => (
+          <option value={c.id}>{String(i + 1).padStart(2, '0')} {c.name}</option>
+        ))}
+      </select>
+    </label>
+  </div>
+
+  <div class="screen-wrap">
+    <div class="crt" id="crt">
+      <div class="crt-noise"></div>
+      <div class="crt-ch" id="crt-ch">CH-01</div>
+    </div>
+    <iframe
+      class="screen"
+      id="screen"
+      title="友链频道"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+      referrerpolicy="no-referrer"
+    ></iframe>
+  </div>
+
+  <div class="sync" id="sync-info">同步状态加载中…</div>
+</div>
+
+<style>
+  .tv {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    outline: none;
+  }
+  .chips {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+  }
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--panel);
+  }
+  .chip-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 999px;
+  }
+  .chip-btn:hover {
+    background: #1b2027;
+  }
+  .chip-btn.active {
+    background: #232a33;
+    box-shadow: inset 0 0 0 1px var(--accent);
+  }
+  .chip-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .avatar {
+    position: relative;
+    flex: 0 0 26px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #2a313a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .avatar-fallback {
+    display: none;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .chip-name {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .origin {
+    font-size: 12px;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 2px 6px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .origin:hover {
+    color: var(--accent);
+  }
+  .status {
+    margin-left: 4px;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .status.ok {
+    color: #7ee2a8;
+    background: rgba(61, 220, 133, 0.12);
+  }
+  .status.err {
+    color: #ff9d9d;
+    background: rgba(255, 80, 80, 0.12);
+  }
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .ctl {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--fg);
+    font-size: 15px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .ctl:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .current {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 14px;
+    color: var(--muted);
+    min-width: 130px;
+  }
+  .jump {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .jump select {
+    background: var(--panel);
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 8px;
+    font: inherit;
+  }
+  .screen-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .screen {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #fff;
+  }
+  .crt {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s;
+  }
+  .crt.on {
+    opacity: 1;
+  }
+  .crt-noise {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: mh-noise 0.25s steps(3) infinite;
+  }
+  .crt-ch {
+    position: relative;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: clamp(48px, 12vw, 140px);
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.14);
+    letter-spacing: 2px;
+  }
+  .sync {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  @keyframes mh-noise {
+    0% {
+      background-position: 0 0;
+    }
+    33% {
+      background-position: -60px 40px;
+    }
+    66% {
+      background-position: 40px -80px;
+    }
+    100% {
+      background-position: -20px -30px;
+    }
+  }
+</style>
+
+<script define:vars={{ channels }}>
+  const tvEl = document.getElementById('tv');
+  const BASE = import.meta.env.BASE_URL;
+  const screen = document.getElementById('screen');
+  const crt = document.getElementById('crt');
+  const crtCh = document.getElementById('crt-ch');
+  const chipsEl = document.getElementById('chips');
+  const jumpEl = document.getElementById('jump');
+  const currentLabel = document.getElementById('current-label');
+  const syncInfo = document.getElementById('sync-info');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+
+  const unavailable = new Set();
+
+  let currentId = new URLSearchParams(location.search).get('ch');
+  if (!channels.some((c) => c.id === currentId)) currentId = channels[0].id;
+
+  const indexOf = (id) => channels.findIndex((c) => c.id === id);
+  const enabled = () => channels.filter((c) => !unavailable.has(c.id));
+  const labelOf = (id) => `CH-${String(indexOf(id) + 1).padStart(2, '0')}`;
+
+  function setActive(id) {
+    document.querySelectorAll('.chip-btn').forEach((b) => {
+      b.classList.toggle('active', b.dataset.id === id);
+    });
+  }
+
+  function loadChannel(id) {
+    if (unavailable.has(id)) return;
+    setActive(id);
+    const target = `${BASE}channels/${id}/`;
+    const name = channels[indexOf(id)].name;
+    currentLabel.textContent = `${labelOf(id)} · ${name}`;
+    jumpEl.value = id;
+    if (screen.dataset.loaded !== id) {
+      crtCh.textContent = labelOf(id);
+      crt.classList.add('on');
+      setTimeout(() => {
+        screen.src = target;
+      }, 340);
+    }
+    screen.dataset.loaded = id;
+    history.replaceState(null, '', `?ch=${id}`);
+  }
+
+  function step(delta) {
+    const list = enabled();
+    if (!list.length) return;
+    const i = list.findIndex((c) => c.id === currentId);
+    loadChannel(list[(i + delta + list.length) % list.length].id);
+  }
+
+  screen.addEventListener('load', () => {
+    setTimeout(() => crt.classList.remove('on'), 220);
+  });
+
+  chipsEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip-btn');
+    if (btn) loadChannel(btn.dataset.id);
+  });
+  prevBtn.addEventListener('click', () => step(-1));
+  nextBtn.addEventListener('click', () => step(1));
+  jumpEl.addEventListener('change', () => loadChannel(jumpEl.value));
+  tvEl.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      step(1);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      step(-1);
+    }
+  });
+
+  document.querySelectorAll('.avatar').forEach((a) => {
+    const img = a.querySelector('img');
+    const fb = a.querySelector('.avatar-fallback');
+    img.addEventListener('error', () => {
+      img.style.display = 'none';
+      fb.style.display = 'flex';
+    });
+  });
+
+  fetch(`${BASE}channels/status.json`)
+    .then((r) => (r.ok ? r.json() : Promise.reject(new Error('no status'))))
+    .then((data) => {
+      const updated = new Date(data.updatedAt).toLocaleString('zh-CN', { hour12: false });
+      syncInfo.textContent = `最后同步：${updated}`;
+      Object.entries(data.channels || {}).forEach(([id, st]) => {
+        const btn = document.querySelector(`.chip-btn[data-id="${id}"]`);
+        if (!btn) return;
+        const badge = document.createElement('span');
+        if (st.error) {
+          unavailable.add(id);
+          btn.disabled = true;
+          btn.classList.remove('active');
+          const opt = jumpEl.querySelector(`option[value="${id}"]`);
+          if (opt) opt.disabled = true;
+          badge.className = 'status err';
+          badge.textContent = '不可用';
+        } else {
+          badge.className = 'status ok';
+          badge.textContent = '已同步';
+        }
+        btn.appendChild(badge);
+      });
+      if (unavailable.has(currentId)) {
+        const first = enabled()[0];
+        if (first) loadChannel(first.id);
+      }
+    })
+    .catch(() => {
+      syncInfo.textContent = '同步状态未知';
+    });
+
+  loadChannel(currentId);
+</script>

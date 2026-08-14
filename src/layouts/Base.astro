@@ -1,0 +1,85 @@
+---
+import '../styles/global.css';
+
+const { title = 'RedRock' } = Astro.props;
+const BASE = import.meta.env.BASE_URL;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="site-logo" href={BASE}>RedRock</a>
+      <nav class="site-nav">
+        <a href={BASE}>首页</a>
+        <a href={`${BASE}tv/`}>友链电视</a>
+        <a class="apply" href="https://github.com/RedrockTeam/RedRockBlog/pulls" target="_blank" rel="noopener">申请加入</a>
+      </nav>
+    </header>
+    <main class="site-main">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <p>友链电视为各博客的静态镜像，仅作展示；完整功能请访问原站。</p>
+      <p><a href="https://github.com/RedrockTeam/RedRockBlog" target="_blank" rel="noopener">RedRock Blog · GitHub</a></p>
+    </footer>
+    <style>
+      .site-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 24px;
+        border-bottom: 1px solid var(--border);
+      }
+      .site-logo {
+        color: var(--fg);
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-decoration: none;
+      }
+      .site-nav {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+      .site-nav a {
+        color: var(--muted);
+        font-size: 14px;
+        text-decoration: none;
+      }
+      .site-nav a:hover {
+        color: var(--accent);
+      }
+      .site-nav .apply {
+        color: var(--accent);
+      }
+      .site-main {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 32px 24px 48px;
+      }
+      .site-footer {
+        border-top: 1px solid var(--border);
+        padding: 20px 24px;
+        text-align: center;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .site-footer a {
+        color: var(--muted);
+      }
+      .site-footer a:hover {
+        color: var(--accent);
+      }
+      .site-footer p + p {
+        margin-top: 6px;
+      }
+    </style>
+  </body>
+</html>

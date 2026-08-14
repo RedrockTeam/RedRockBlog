@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { readFile, writeFile, mkdir, readdir, stat, rm, open } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -18,42 +18,54 @@ await mkdir(outRoot, { recursive: true });
 const status = { updatedAt: new Date().toISOString(), channels: {} };
 
 async function processChannel(channel) {
-  const origin = new URL(channel.url);
   const id = channel.id;
   const cacheDir = path.join(ROOT, '.cache/mirror', id);
-  const hostDir = path.join(cacheDir, origin.host);
   const outDir = path.join(outRoot, id);
   const prefix = `${prefixRoot}/${id}`;
   const entry = { id, name: channel.name, url: channel.url };
 
-  try {
-    const args = [
-      '-m',
-      '-p',
-      '-np',
-      '-E',
-      '-k',
-      '-nv',
-      '--no-remove-listing',
-      '--timeout=30',
-      '--tries=3',
-      '--reject-regex',
-      '\\?width=',
-      '-P',
-      cacheDir,
-      channel.url,
-    ];
-    if (process.env.MIRROR_QUICK) args.push('--level=2');
-    // 清理缓存中无扩展名的页面文件：wget -E 会把它们存成 .html，
-    // 旧的同名文件会阻塞分页目录（如 /tags/x/page/2）
-    await cleanStaleCache(cacheDir);
-    execFileSync('wget', args, { stdio: 'inherit' });
-  } catch {
-    // wget 对个别 404 也会返回非 0，先不视为失败，以产物校验为准
+  const args = [
+    '-m',
+    '-p',
+    '-np',
+    '-E',
+    '-k',
+    '-nv',
+    '--no-remove-listing',
+    '--timeout=30',
+    '--tries=3',
+    '--reject-regex',
+    '\\?width=',
+    '-P',
+    cacheDir,
+    channel.url,
+  ];
+  if (process.env.MIRROR_QUICK) args.push('--level=2');
+
+  // 清理缓存中无扩展名的页面文件：wget -E 会把它们存成 .html，
+  // 旧的同名文件会阻塞分页目录（如 /tags/x/page/2）
+  await cleanStaleCache(cacheDir);
+
+  let hostDir = null;
+  let lastErr = '';
+  for (let attempt = 1; attempt <= 2 && !hostDir; attempt += 1) {
+    const capture = attempt === 2;
+    const res = spawnSync('wget', args, {
+      stdio: capture ? ['ignore', 'inherit', 'pipe'] : 'inherit',
+    });
+    if (res.error) lastErr = res.error.message;
+    else if (res.status !== 0) lastErr = `wget 退出码 ${res.status}`;
+    if (capture && res.stderr) {
+      const tail = res.stderr.toString('utf8').trim().split('\n').slice(-8).join('\n');
+      if (tail) lastErr += `\n${tail}`;
+    }
+    hostDir = await findHostDir(cacheDir);
+    if (!hostDir && attempt === 1) console.warn(`[${id}] 第 1 次抓取失败，重试中…`);
   }
 
+  // 拉取失败直接丢弃该频道：不生成镜像目录、不部署旧缓存
   if (!existsSync(hostDir)) {
-    entry.error = '抓取失败：未产生镜像目录';
+    entry.error = lastErr ? `抓取失败：${lastErr}` : '抓取失败：未产生镜像目录';
     console.error(`[${id}] ${entry.error}`);
     return entry;
   }
@@ -76,6 +88,18 @@ async function processChannel(channel) {
     console.error(`[${id}] ${entry.error}`);
   }
   return entry;
+}
+
+async function findHostDir(cacheDir) {
+  if (!existsSync(cacheDir)) return null;
+  const dirs = (await readdir(cacheDir, { withFileTypes: true }))
+    .filter((d) => d.isDirectory())
+    .map((d) => path.join(cacheDir, d.name));
+  if (dirs.length === 0) return null;
+  for (const dir of dirs) {
+    if (existsSync(path.join(dir, 'index.html'))) return dir;
+  }
+  return dirs[0];
 }
 
 const CONCURRENCY = Math.min(3, channels.length);
