@@ -32,7 +32,7 @@ jobs:
       - name: Restore mirror cache
         uses: actions/cache@v4
         with:
-          path: .cache/mirror
+          path: .cache
           key: mirror-${{ hashFiles('src/data/channels.json') }}-${{ github.run_id }}
           restore-keys: |
             mirror-${{ hashFiles('src/data/channels.json') }}-
