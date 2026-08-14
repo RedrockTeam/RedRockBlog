@@ -33,9 +33,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .cache
-          key: mirror-${{ hashFiles('src/data/channels.json') }}-${{ github.run_id }}
+          # 稳定 key：每次成功运行覆盖同一个缓存条目，避免堆积 370MB 级快照，
+          # 并保证增量状态（.cache/state）在下次运行一定能恢复
+          key: mirror-${{ hashFiles('src/data/channels.json') }}
           restore-keys: |
-            mirror-${{ hashFiles('src/data/channels.json') }}-
             mirror-
 
       - name: Mirror and sanitize
