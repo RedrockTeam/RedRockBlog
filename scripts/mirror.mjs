@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import astroConfig from '../astro.config.mjs';
-import { sanitizeChannel } from './sanitize.mjs';
+import { sanitizeChannel, MEDIA_EXT_RE, SAFE_FILE_RE, looksLikeMedia } from './sanitize.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const base = (astroConfig.base ?? '').replace(/\/$/, '');
@@ -13,6 +13,10 @@ const outRoot = path.join(ROOT, 'public/channels');
 const stateRoot = path.join(ROOT, '.cache/state');
 // 首页与归档列表不在 sitemap 中，但新文章会出现在这里，始终刷新
 const ALWAYS_FETCH = ['/', '/archives'];
+// 媒体/字体不再下载：wget 直接拒绝（含 ?width= 缩略图变体），
+// 清洗阶段再把引用直链回原站。zip/pdf/xml 等非媒体附件仍下载。
+const REJECT_MEDIA_RE =
+  '(\\?width=)|\\.(png|jpe?g|webp|gif|svg|ico|avif|bmp|apng|mp4|webm|ogv|mov|mp3|wav|ogg|oga|flac|aac|m4a|woff2?|ttf|otf|eot)([?#]|$)';
 
 const channelsData = JSON.parse(await readFile(path.join(ROOT, 'src/data/channels.json'), 'utf8'));
 const channels = (channelsData.channels ?? []).filter((c) => c.enabled !== false);
@@ -39,8 +43,8 @@ async function processChannel(channel) {
   // 缓存目录为空（首次 / 缓存丢失）时，先全量抓取并播种状态
   if (!hostDir) {
     const args = [
-      '-m', '-p', '-np', '-E', '-k', '-nv', '--no-remove-listing',
-      '--timeout=30', '--tries=3', '--reject-regex', '\\?width=',
+      '-m', '-p', '-np', '-E', '-nv', '--no-remove-listing',
+      '--timeout=30', '--tries=3', '--reject-regex', REJECT_MEDIA_RE,
       '-P', cacheDir, channel.url,
     ];
     if (process.env.MIRROR_QUICK) args.push('--level=2');
@@ -78,8 +82,6 @@ async function processChannel(channel) {
     }
   }
 
-  await fetchExtraAssets(channel, hostDir);
-
   try {
     await sanitizeChannel({
       hostDir,
@@ -89,8 +91,9 @@ async function processChannel(channel) {
       prefix,
       base: base || '',
       extraOrigins: channel.extraOrigins || [],
-      extraAssets: channel.extraAssets || [],
     });
+    // 镜像产物已无媒体；顺手清掉缓存里的旧媒体文件，避免 Actions 缓存滞留
+    await purgeMediaFiles(hostDir);
     const { sizeBytes, fileCount } = await dirStats(outDir);
     entry.sizeBytes = sizeBytes;
     entry.fileCount = fileCount;
@@ -104,31 +107,6 @@ async function processChannel(channel) {
     console.error(`[${id}] ${entry.error}`);
   }
   return entry;
-}
-
-// 把配置里声明的外站资源（如动态壁纸视频）镜像到本地，避免访客每次访问都请求友站图床。
-// 只下载一次：文件已存在则跳过，随 Actions 缓存保留。
-async function fetchExtraAssets(channel, hostDir) {
-  if (!hostDir) return;
-  for (const asset of channel.extraAssets || []) {
-    if (!asset?.url || !asset?.path || asset.path.includes('..')) continue;
-    const target = path.join(hostDir, asset.path);
-    if (existsSync(target)) continue;
-    await mkdir(path.dirname(target), { recursive: true });
-    console.log(`[${channel.id}] 下载额外资源 ${asset.url}`);
-    try {
-      const res = await fetch(asset.url, { signal: AbortSignal.timeout(120000) });
-      if (!res.ok) {
-        console.warn(`[${channel.id}] 额外资源下载失败 HTTP ${res.status}：${asset.url}`);
-        continue;
-      }
-      const buf = Buffer.from(await res.arrayBuffer());
-      await writeFile(target, buf);
-      console.log(`[${channel.id}] 额外资源已保存 ${asset.path}（${(buf.length / 1048576).toFixed(1)} MB）`);
-    } catch (e) {
-      console.warn(`[${channel.id}] 额外资源下载失败：${asset.url} (${e.message})`);
-    }
-  }
 }
 
 // 增量更新：对照 sitemap + 状态文件，只拉新增/更新的页面，并删除源站已移除的页面
@@ -186,8 +164,8 @@ async function tryIncremental(channel, cacheDir) {
   if (urls.size) {
     fetched = urls.size;
     const args = [
-      '-E', '-k', '-p', '-np', '-N', '-nv', '--timeout=30', '--tries=3',
-      '--reject-regex', '\\?width=', '-P', cacheDir, ...urls,
+      '-E', '-p', '-np', '-N', '-nv', '--timeout=30', '--tries=3',
+      '--reject-regex', REJECT_MEDIA_RE, '-P', cacheDir, ...urls,
     ];
     const res = spawnSync('wget', args, { stdio: 'inherit' });
     if (res.status !== 0) {
@@ -388,4 +366,31 @@ async function looksLikeHtml(file) {
   } catch {
     return false;
   }
+}
+
+async function listAllFiles(dir) {
+  const out = [];
+  async function walk(d) {
+    for (const entry of await readdir(d, { withFileTypes: true })) {
+      const p = path.join(d, entry.name);
+      if (entry.isDirectory()) await walk(p);
+      else if (entry.isFile()) out.push(p);
+    }
+  }
+  await walk(dir);
+  return out;
+}
+
+// 删除缓存中遗留的媒体/字体文件（wget 新拉取已按 REJECT_MEDIA_RE 拒绝）
+async function purgeMediaFiles(dir) {
+  if (!existsSync(dir)) return;
+  let removed = 0;
+  for (const file of await listAllFiles(dir)) {
+    const rel = path.relative(dir, file);
+    if (MEDIA_EXT_RE.test(rel) || (!SAFE_FILE_RE.test(rel) && (await looksLikeMedia(file)))) {
+      await rm(file, { force: true });
+      removed += 1;
+    }
+  }
+  if (removed) console.log(`[cache] 清理 ${removed} 个媒体/字体缓存文件`);
 }
