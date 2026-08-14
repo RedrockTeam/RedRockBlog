@@ -28,7 +28,11 @@ function rewriteAssetExt(value) {
 
 function cleanRef(value, prefix) {
   if (typeof value !== 'string') return value;
-  return rewriteAssetExt(rewriteRoot(value, prefix));
+  let v = rewriteAssetExt(rewriteRoot(value, prefix));
+  // wget 把含查询串的资源存成字面 "?":main.css?v=1.0.6，引用需编码为 %3F，
+  // 否则浏览器把 ? 当查询串、按 main.css 找文件 → 404（页面白屏）
+  if (!/^(https?:)?\/\//i.test(v)) v = v.replace(/\?/g, '%3F');
+  return v;
 }
 
 // 把原站绝对链接的路径解析为镜像里真实存在的相对文件（与 wget -E 落盘规则一致）
@@ -160,8 +164,15 @@ async function sanitizeHtml(file, { origin, prefix, base, outDir }) {
   // 拦成白屏、并让电视壳的返回/前进/刷新因跨域安全限制而失效
   const channelOrigin = new URL(origin).origin;
   $('a[href]').each((_, el) => {
-    const href = $(el).attr('href');
-    if (typeof href !== 'string' || !/^(https?:)?\/\//i.test(href)) return;
+    let href = $(el).attr('href');
+    if (typeof href !== 'string') return;
+    // 已被通用规则加过前缀的根相对链接：解析为真实本地文件（补 .html）
+    if (href.startsWith(prefix + '/')) {
+      const resolved = resolveLocalPath(href.slice(prefix.length), outDir);
+      if (resolved) $(el).attr('href', `${prefix}/${resolved}`);
+      return;
+    }
+    if (!/^(https?:)?\/\//i.test(href)) return;
     let url;
     try {
       url = new URL(href, origin);
