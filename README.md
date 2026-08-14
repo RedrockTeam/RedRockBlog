@@ -31,6 +31,12 @@ npm run dev          # 本地预览
 }
 ```
 
+可选字段（按需填写）：
+
+- `extraOrigins`：图片放在独立图床时，把图床域名加进 `img-src` 白名单，如 `["https://image.example.com:443"]`。
+- `alwaysFetch`：sitemap 未收录但希望始终刷新的页面，如 `["/links"]`。
+- `extraAssets`：希望镜像到本地的外站资源（如动态壁纸视频），`url` 为原地址、`path` 为镜像内相对路径；已存在时跳过，随 CI 缓存保留。
+
 提交 PR 即视为同意本站对博客做静态镜像（保留署名、功能引导回原站）。CI 会自动校验格式。
 
 ## 部署

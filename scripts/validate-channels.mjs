@@ -42,6 +42,62 @@ for (const [i, c] of (data.channels ?? []).entries()) {
   if (c.enabled !== undefined && typeof c.enabled !== 'boolean') {
     errors.push(`${at}: enabled 必须是布尔值`);
   }
+  if (c.extraOrigins !== undefined) {
+    if (!Array.isArray(c.extraOrigins) || !c.extraOrigins.length) {
+      errors.push(`${at}: extraOrigins 必须是数组`);
+    } else {
+      for (const [j, o] of c.extraOrigins.entries()) {
+        let u;
+        try {
+          u = new URL(o);
+        } catch {
+          u = null;
+        }
+        if (!u || !/^https?:$/.test(u.protocol) || !u.hostname) {
+          errors.push(`${at}: extraOrigins[${j}] 必须是 http(s) 地址`);
+        }
+      }
+    }
+  }
+  if (c.alwaysFetch !== undefined) {
+    if (!Array.isArray(c.alwaysFetch) || !c.alwaysFetch.length) {
+      errors.push(`${at}: alwaysFetch 必须是数组`);
+    } else {
+      for (const [j, p] of c.alwaysFetch.entries()) {
+        if (typeof p !== 'string' || !p.startsWith('/') || p.includes('..')) {
+          errors.push(`${at}: alwaysFetch[${j}] 必须是 / 开头的站内路径`);
+        }
+      }
+    }
+  }
+  if (c.extraAssets !== undefined) {
+    if (!Array.isArray(c.extraAssets) || !c.extraAssets.length) {
+      errors.push(`${at}: extraAssets 必须是数组`);
+    } else {
+      for (const [j, a] of c.extraAssets.entries()) {
+        if (!a || typeof a !== 'object') {
+          errors.push(`${at}: extraAssets[${j}] 必须是对象 { url, path }`);
+          continue;
+        }
+        let u;
+        try {
+          u = new URL(a.url);
+        } catch {
+          u = null;
+        }
+        if (!u || !/^https?:$/.test(u.protocol)) {
+          errors.push(`${at}: extraAssets[${j}].url 必须是 http(s) 地址`);
+        }
+        if (
+          typeof a.path !== 'string' ||
+          a.path.startsWith('/') ||
+          a.path.includes('..')
+        ) {
+          errors.push(`${at}: extraAssets[${j}].path 必须是站内相对路径`);
+        }
+      }
+    }
+  }
 }
 
 if (errors.length) {

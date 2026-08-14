@@ -78,6 +78,8 @@ async function processChannel(channel) {
     }
   }
 
+  await fetchExtraAssets(channel, hostDir);
+
   try {
     await sanitizeChannel({
       hostDir,
@@ -86,6 +88,8 @@ async function processChannel(channel) {
       origin: channel.url,
       prefix,
       base: base || '',
+      extraOrigins: channel.extraOrigins || [],
+      extraAssets: channel.extraAssets || [],
     });
     const { sizeBytes, fileCount } = await dirStats(outDir);
     entry.sizeBytes = sizeBytes;
@@ -100,6 +104,31 @@ async function processChannel(channel) {
     console.error(`[${id}] ${entry.error}`);
   }
   return entry;
+}
+
+// 把配置里声明的外站资源（如动态壁纸视频）镜像到本地，避免访客每次访问都请求友站图床。
+// 只下载一次：文件已存在则跳过，随 Actions 缓存保留。
+async function fetchExtraAssets(channel, hostDir) {
+  if (!hostDir) return;
+  for (const asset of channel.extraAssets || []) {
+    if (!asset?.url || !asset?.path || asset.path.includes('..')) continue;
+    const target = path.join(hostDir, asset.path);
+    if (existsSync(target)) continue;
+    await mkdir(path.dirname(target), { recursive: true });
+    console.log(`[${channel.id}] 下载额外资源 ${asset.url}`);
+    try {
+      const res = await fetch(asset.url, { signal: AbortSignal.timeout(120000) });
+      if (!res.ok) {
+        console.warn(`[${channel.id}] 额外资源下载失败 HTTP ${res.status}：${asset.url}`);
+        continue;
+      }
+      const buf = Buffer.from(await res.arrayBuffer());
+      await writeFile(target, buf);
+      console.log(`[${channel.id}] 额外资源已保存 ${asset.path}（${(buf.length / 1048576).toFixed(1)} MB）`);
+    } catch (e) {
+      console.warn(`[${channel.id}] 额外资源下载失败：${asset.url} (${e.message})`);
+    }
+  }
 }
 
 // 增量更新：对照 sitemap + 状态文件，只拉新增/更新的页面，并删除源站已移除的页面
@@ -149,7 +178,9 @@ async function tryIncremental(channel, cacheDir) {
 
   const origin = new URL(channel.url).origin;
   const urls = new Set(toFetch.map((p) => origin + p));
-  for (const p of ALWAYS_FETCH) urls.add(origin + p);
+  const always = new Set(ALWAYS_FETCH);
+  for (const p of channel.alwaysFetch || []) always.add(p);
+  for (const p of always) urls.add(origin + p);
 
   let fetched = 0;
   if (urls.size) {
@@ -158,7 +189,10 @@ async function tryIncremental(channel, cacheDir) {
       '-E', '-k', '-p', '-np', '-N', '-nv', '--timeout=30', '--tries=3',
       '--reject-regex', '\\?width=', '-P', cacheDir, ...urls,
     ];
-    spawnSync('wget', args, { stdio: 'inherit' });
+    const res = spawnSync('wget', args, { stdio: 'inherit' });
+    if (res.status !== 0) {
+      console.warn(`[${channel.id}] 增量抓取 wget 退出码 ${res.status}，沿用本地已有缓存`);
+    }
   }
 
   // 删除源站 sitemap 中已消失的页面
