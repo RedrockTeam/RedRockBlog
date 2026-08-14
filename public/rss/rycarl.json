@@ -1,0 +1,254 @@
+{
+  "version": 2,
+  "channel": {
+    "id": "rycarl",
+    "name": "Rycarl's little blog",
+    "url": "https://blog.rycarl.cn/",
+    "rssUrl": "https://blog.rycarl.cn/rss.xml",
+    "description": "Rycarl's little blog"
+  },
+  "fetchedAt": "2026-08-14T19:45:57.844Z",
+  "sourceUpdatedAt": "2026-08-14T19:09:09.000Z",
+  "items": [
+    {
+      "id": "/archives/fastjsonwu-tiao-jian-rcefen-xi",
+      "title": "Fastjson无条件RCE分析",
+      "link": "https://blog.rycarl.cn/archives/fastjsonwu-tiao-jian-rcefen-xi",
+      "summary": "该文章详细分析了Fastjson 1.2.83版本的反序列化漏洞。漏洞核心在于`ParserConfig.checkAutoType`方法中，攻击者可通过构造特殊的`@type`值（如`jar:http://...`）触发远程资源加载。即使`autoTypeSupport`关闭，代码仍能通过远程class文件中的`@JSONType`注解进入`TypeUtils.loadClass`，最终可能导致RCE。文章提供了Linux环境下JDK8到JDK21的复现指南，并说明JDK8+版本需利用`jar:file:/proc/self/fd/N`路径探测及缓存文件描述符来绕过类名校验，成功执行任意命令。该漏洞影响广泛，因大量服务器仍使用已停",
+      "author": "Rycarl",
+      "categories": [
+        "Java安全"
+      ],
+      "publishedAt": "2026-07-25T17:40:54.000Z",
+      "image": null
+    },
+    {
+      "id": "/archives/%E8%AE%B0%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%AE%9E%E4%B9%A0",
+      "title": "记第一次实习",
+      "link": "https://blog.rycarl.cn/archives/%E8%AE%B0%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%AE%9E%E4%B9%A0",
+      "summary": "作者分享了在上海智元公司的实习经历。经历了两轮面试：一面在旅途奔波中完成，面试官引导式提问；二面难度更大但最终通过。独自前往上海租房和适应陌生环境初期颇有挑战，外滩的繁华与复古氛围令人震撼。入职后，同事热情，工作内容（渗透测试）比CTF比赛更有成就感，公司鼓励学习新技能如逆向工程。整体氛围积极向上，作者已初步适应并兼顾学业，感到幸运与满足。",
+      "author": "Rycarl",
+      "categories": [
+        "生活"
+      ],
+      "publishedAt": "2026-05-22T12:57:54.000Z",
+      "image": "images/rycarl/1dd649531492ecc41eee.jpg"
+    },
+    {
+      "id": "/archives/java-ghost-bit%E8%A7%A3%E6%9E%90%E4%B8%8E%E5%88%A9%E7%94%A8",
+      "title": "Java Ghost Bit解析与利用",
+      "link": "https://blog.rycarl.cn/archives/java-ghost-bit%E8%A7%A3%E6%9E%90%E4%B8%8E%E5%88%A9%E7%94%A8",
+      "summary": "Ghost Bit是一种利用Web应用防火墙（WAF）与后端Java解析不一致的通用绕过手法。其核心原理是构造特殊字节序列，使WAF将其视为无害数据放行，而Java虚拟机（JVM）却将其解析为有效指令。这主要源于类型转换时高位被丢弃，例如char强制转为byte会丢失高8位。该手法影响广泛，可绕过主流WAF及历史漏洞补丁。文章展示了多个实战案例，包括绕过Fastjson、Jackson的漏洞检测，利用CVE-2025-41242实现目录穿越，以及Bypass Tomcat文件上传黑名单、HTTP请求头注入等。攻击者可借此构造变形Payload，实现对多种安全防护的有效绕过。",
+      "author": "Rycarl",
+      "categories": [
+        "Java安全"
+      ],
+      "publishedAt": "2026-05-07T11:58:03.000Z",
+      "image": "images/rycarl/4408bde728faaf8eefd3.webp"
+    },
+    {
+      "id": "/archives/java%E5%AE%89%E5%85%A8-%E5%8F%8D%E5%B0%84%E4%B8%8E%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%EF%BC%881%EF%BC%89",
+      "title": "Java安全-反射与命令执行（1）",
+      "link": "https://blog.rycarl.cn/archives/java%E5%AE%89%E5%85%A8-%E5%8F%8D%E5%B0%84%E4%B8%8E%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%EF%BC%881%EF%BC%89",
+      "summary": "本文系统性地介绍了Java反射机制的核心概念与实际应用。反射允许程序在运行时动态获取类的属性与方法并调用，打破了传统“正射”需预先知悉类的限制。其关键方法包括`forName`获取类、`newInstance`实例化、`getMethod`获取方法及`invoke`执行方法。文章通过图像处理滤镜的动态加载场景对比了反射与硬编码实现的优劣，并演示了如何利用反射实现命令执行。进一步地，文章剖析了`Class.forName`三参数重载方法中`initialize`参数对类初始化的影响，以及`ClassLoader`参数如何通过自定义类加载器加载不在Classpath中的类，为后续Java安全研究中的反序列化等利用奠定了基础。",
+      "author": "Rycarl",
+      "categories": [
+        "Java安全"
+      ],
+      "publishedAt": "2026-04-23T11:19:32.000Z",
+      "image": "images/rycarl/b4b3da75461a8ffb2ab1.webp"
+    },
+    {
+      "id": "/archives/php%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-thinkphp5-0-23%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E",
+      "title": "PHP代码审计-thinkphp5.0.23命令执行漏洞",
+      "link": "https://blog.rycarl.cn/archives/php%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-thinkphp5-0-23%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E",
+      "summary": "本文揭示了ThinkPHP 5.0.23版本中的一个安全漏洞。主要问题在于Request类的`method()`方法允许通过POST参数`_method`覆盖请求方法，且`__construct()`构造方法存在属性覆盖风险。攻击者可利用`param()`函数最终调用`filterValue()`方法中的`call_user_func`执行任意函数。通过构造特定Payload（如`_method=__construct&filter[]=system&server[REQUEST_METHOD]=whoami`），可实现远程命令执行。该漏洞源于对用户输入过滤不足，可能导致服务器被控制。",
+      "author": "Rycarl",
+      "categories": [
+        "代码审计"
+      ],
+      "publishedAt": "2026-04-18T14:00:39.000Z",
+      "image": "images/rycarl/6096a373aad4aa775e57.webp"
+    },
+    {
+      "id": "/archives/java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E",
+      "title": "Java反序列化漏洞",
+      "link": "https://blog.rycarl.cn/archives/java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E",
+      "summary": "本文以对比PHP的方式引入Java反序列化漏洞学习，强调利用类比方法。核心是通过攻击者可控的 `ObjectInputStream.readObject()` 入口，在反序列化过程中触发恶意代码。原理在于重写目标类的 `readObject` 方法，或利用类库（如 Commons Collections）中复杂的调用链（Gadget Chain）串联多个方法，最终实现RCE。文中以最简单的URLDNS链为例，剖析了从HashMap的 `readObject` 调用 `hash(key)`，进而触发URL类的 `hashCode` 方法并发起DNS请求的完整过程，揭示了反序列化漏洞的构成要件：实现 Serializable 接口、可用",
+      "author": "Rycarl",
+      "categories": [
+        "Java安全"
+      ],
+      "publishedAt": "2026-04-15T02:14:03.000Z",
+      "image": "images/rycarl/279b9e980187663fb959.webp"
+    },
+    {
+      "id": "/archives/%E6%98%A5%E7%A7%8B%E4%BA%91%E9%95%9Cdelegation",
+      "title": "春秋云镜Delegation",
+      "link": "https://blog.rycarl.cn/archives/%E6%98%A5%E7%A7%8B%E4%BA%91%E9%95%9Cdelegation",
+      "summary": "文章记录了从外部渗透到域控的完整攻击链。首先，攻击者利用目标站点CMS的弱口令（admin/123456）登录，通过编辑HTML模板植入PHP木马获取Webshell。随后，在内网扫描中发现多台主机，通过密码爆破获取Windows主机（172.22.4.45）的凭据并远程登录。接着，利用Meterpreter创建服务后门，获取系统权限并导出本地及域内用户Hash。信息收集发现域内存在非约束委派配置，通过触发RPC认证获取域控（DC01）的TGT票据。最后，利用票据注入和DCSync攻击导出域内所有用户Hash，成功获取域管理员权限，完成对整个域的控制。",
+      "author": "Rycarl",
+      "categories": [
+        "内网渗透"
+      ],
+      "publishedAt": "2026-04-11T03:33:44.000Z",
+      "image": "images/rycarl/7c2c1218a74a7085733b.webp"
+    },
+    {
+      "id": "/archives/%E6%98%A5%E7%A7%8B%E4%BA%91%E9%95%9Ccertify%E6%89%93%E9%9D%B6%E8%AE%B0%E5%BD%95kerberoast%E6%94%BB%E5%87%BB%E8%AE%B2%E8%A7%A3",
+      "title": "春秋云镜Certify打靶记录(Kerberoast攻击讲解)",
+      "link": "https://blog.rycarl.cn/archives/%E6%98%A5%E7%A7%8B%E4%BA%91%E9%95%9Ccertify%E6%89%93%E9%9D%B6%E8%AE%B0%E5%BD%95kerberoast%E6%94%BB%E5%87%BB%E8%AE%B2%E8%A7%A3",
+      "summary": "通过端口扫描与目录爆破发现Apache Solr资产并利用其Log4j漏洞（CVE）成功初始访问。使用sudo -l发现grc拥有--pty权限，借此提权获取系统权限和第一个flag。后续横向移动中，在文件服务器获取到包含凭据的数据库文件，通过Kerberoast攻击获取服务账户hash并破解，得到域用户chenchen的密码。进一步利用证书请求、DCSync攻击获取域管理员NTLM哈希，最终通过Pass-the-Hash横向至域控制器，成功读取多个flag。文章详细解析了Kerberoast攻击原理及利用过程，为内网渗透提供实战参考。",
+      "author": "Rycarl",
+      "categories": [
+        "内网渗透"
+      ],
+      "publishedAt": "2026-04-10T05:33:57.000Z",
+      "image": "images/rycarl/2435489d9bca427d7307.jpg"
+    },
+    {
+      "id": "/archives/nodejs%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E5%9F%BA%E7%A1%80",
+      "title": "Nodejs模板注入基础",
+      "link": "https://blog.rycarl.cn/archives/nodejs%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E5%9F%BA%E7%A1%80",
+      "summary": "本文聚焦Node.js环境中常见的服务器端模板注入（SSTI）漏洞，重点分析了EJS、Pug（Jade）和Nunjucks三大模板引擎。文章详细阐述了各引擎的语法、危险函数及利用方式，指出SSTI的核心成因在于用户输入被直接拼接进模板字符串中。EJS可通过`<%= ... %>`执行命令；Pug利用`#{}`插值语法进行注入；Nunjucks则通过访问对象的`constructor`属性构造函数来执行系统命令。此外，文章还介绍了配合原型链污染实现远程代码执行（RCE）的方法，以及绕过WAF的字符串拼接和Unicode编码技巧，为理解与防范Node.js SSTI提供了关键技术要点。",
+      "author": "Rycarl",
+      "categories": [
+        "Web安全"
+      ],
+      "publishedAt": "2026-04-01T02:37:58.000Z",
+      "image": "images/rycarl/2fa1decf936c9cd513b6.webp"
+    },
+    {
+      "id": "/archives/%E6%98%A5%E7%A7%8B%E4%BA%91%E5%A2%83greatwall_2025",
+      "title": "春秋云境GreatWall_2025",
+      "link": "https://blog.rycarl.cn/archives/%E6%98%A5%E7%A7%8B%E4%BA%91%E5%A2%83greatwall_2025",
+      "summary": "本文记录了从外部网络到夺取域控制器的完整渗透过程。攻击者首先发现目标8080端口存在Spring Boot Actuator配置不当，利用CVE-2022-22947漏洞上传WebShell获取容器权限。随后通过CDK工具探测容器环境，利用挂载的宿主机`/proc/sys/kernel/core_pattern`文件实现Docker逃逸，获得宿主机SSH访问权限。进入内网后，扫描发现多个服务，其中移动端应用存在Fastjson反序列化漏洞，成功在172.16.22.88服务器上执行代码。进一步横向移动，利用Zabbix系统的弱口令进入后台，通过脚本功能反弹shell并利用SUID权限的`ss`命令提权。最后，通过Zabbix数据库获",
+      "author": "Rycarl",
+      "categories": [
+        "内网渗透"
+      ],
+      "publishedAt": "2026-03-25T14:02:04.000Z",
+      "image": "images/rycarl/5e226a3f05226c69e61a.webp"
+    },
+    {
+      "id": "/archives/2026%E9%95%BF%E5%9F%8E%E6%9D%AFawdp%E5%8D%8A%E5%86%B3%E8%B5%9Bwp%E8%A5%BF%E5%8D%97%E5%9C%B0%E5%8C%BAweb",
+      "title": "2026长城杯AWDP半决赛WP(西南地区WEB)",
+      "link": "https://blog.rycarl.cn/archives/2026%E9%95%BF%E5%9F%8E%E6%9D%AFawdp%E5%8D%8A%E5%86%B3%E8%B5%9Bwp%E8%A5%BF%E5%8D%97%E5%9C%B0%E5%8C%BAweb",
+      "summary": "本文记录了一次CTF比赛的漏洞利用与修复过程。MediaDrive题目存在文件读取漏洞，利用点在于可通过编码转换绕过路径过滤黑名单。修复方案是固定上传目录路径。easy_time题目涉及SSRF和ZIP Slip漏洞，通过SSRF读取内部PHP服务，并利用恶意压缩包实现文件上传。修复尝试未成功，但成功利用漏洞在/tmp目录读取了flag。",
+      "author": "Rycarl",
+      "categories": [
+        "CTF WP"
+      ],
+      "publishedAt": "2026-03-23T08:11:31.000Z",
+      "image": "images/rycarl/73248aab050ebcb5b2f4.webp"
+    },
+    {
+      "id": "/archives/%E9%A2%84%E7%BC%96%E8%AF%91%E4%B8%8B%E7%9A%84sql%E6%B3%A8%E5%85%A5%E4%BB%A5%E5%8F%8A%E6%80%9D%E8%80%83",
+      "title": "预编译下的SQL注入以及思考",
+      "link": "https://blog.rycarl.cn/archives/%E9%A2%84%E7%BC%96%E8%AF%91%E4%B8%8B%E7%9A%84sql%E6%B3%A8%E5%85%A5%E4%BB%A5%E5%8F%8A%E6%80%9D%E8%80%83",
+      "summary": "文章探讨了预编译（Prepared Statement）机制在特定条件下的SQL注入风险。预编译通常通过分离SQL模板与参数值来防止注入，但存在“虚假预编译”（模拟预编译）的情况，尤其在GBK编码环境下可能通过宽字节注入绕过。当列名或表名用户可控时（如ORDER BY场景），即使使用预编译也可能存在风险。文章演示了在虚假预编译中利用空白字符（如空字节）截断解析，结合注释和子查询构造注入载荷的技术。核心结论是：预编译的安全性取决于其实现方式（是否禁用模拟预编译），且无法保护直接拼接的SQL结构部分（如列名）。读者可了解预编译的潜在漏洞场景及针对性防御措施。",
+      "author": "Rycarl",
+      "categories": [
+        "Web安全"
+      ],
+      "publishedAt": "2026-03-18T09:38:06.000Z",
+      "image": "images/rycarl/d1da77f1dcdf59216afa.webp"
+    },
+    {
+      "id": "/archives/python%E7%BB%A7%E6%89%BF%E4%B8%8Essti%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA",
+      "title": "Python继承与SSTI深入浅出",
+      "link": "https://blog.rycarl.cn/archives/python%E7%BB%A7%E6%89%BF%E4%B8%8Essti%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA",
+      "summary": "文章介绍了服务器端模板注入（SSTI）的基本概念，其原理类似于SQL注入，都是利用服务端配置不当将用户输入当作代码执行。重点讲解了Python的特殊属性（如`__class__`、`__base__`、`__subclasses__()`等）如何通过对象自省访问类的内部结构，从而构建继承链。结合Flask框架的Jinja2模板引擎，演示了如何利用模板语法（如`{{}}`）注入恶意代码。通过`__globals__`和`__builtins__`访问内置函数（如`eval`）或导入`os`模块，实现命令执行或文件读取。文章还分析了不同环境下payload的差异，并提供了完整的攻击思路和示例。",
+      "author": "Rycarl",
+      "categories": [
+        "Web安全"
+      ],
+      "publishedAt": "2026-03-16T10:31:35.000Z",
+      "image": "images/rycarl/a1a0e1252fe92b47c7e4.webp"
+    },
+    {
+      "id": "/archives/391",
+      "title": "NoSQL注入从零开始",
+      "link": "https://blog.rycarl.cn/archives/391",
+      "summary": "NoSQL不仅指SQL，是应对大数据量、高扩展性和灵活性需求的非关系型数据库统称。MongoDB是其代表，作为文档型数据库，数据以类JSON格式存储，核心概念包括数据库、集合和文档。文章介绍了基础操作命令，重点阐述了NoSQL注入原理：当用户输入被直接用作查询条件或拼接进代码时可能引发攻击，涵盖Node.js和PHP中因参数解析为数组或对象导致的注入、以及服务器端JavaScript注入和Shell注入。攻击者可利用$where、mapReduce等操作符或eval()函数执行恶意操作，如绕过认证或数据篡改。读者可了解MongoDB基础及主要安全风险。",
+      "author": "Rycarl",
+      "categories": [
+        "Web安全"
+      ],
+      "publishedAt": "2026-03-06T13:48:05.000Z",
+      "image": "images/rycarl/6aa974f364d186ae1bfe.webp"
+    },
+    {
+      "id": "/archives/2025-2026-%E5%B9%B4%E6%9C%AB%E6%80%BB%E7%BB%93",
+      "title": "2025-2026 年末总结",
+      "link": "https://blog.rycarl.cn/archives/2025-2026-%E5%B9%B4%E6%9C%AB%E6%80%BB%E7%BB%93",
+      "summary": "文章回顾了作者2025年的个人成长与技术探索。作者自认为这一年过得“平庸”，主要收获是加入了信安协会，并度过了20岁生日。大学生活以就业为导向，收获了朋友与更沉稳的心态。技术方面，作者频繁参与CTF比赛但获奖不多，考虑兼修MISC方向。相比CTF，作者对渗透与漏洞挖掘更感兴趣且自认更熟练，分享了参与护网行动及假期挖掘SQL注入、文件读取等高危漏洞的经历。文章总结称，虽然平凡，但学到了知识，对大学生活不再彷徨，并希望未来能为安全领域做出更多贡献。",
+      "author": "Rycarl",
+      "categories": [
+        "生活"
+      ],
+      "publishedAt": "2026-02-24T14:21:38.000Z",
+      "image": "images/rycarl/5cd896cf06189ae06488.jpg"
+    },
+    {
+      "id": "/archives/%E6%98%A5%E7%A7%8B%E4%BA%91%E9%95%9Ctime%E6%89%93%E9%9D%B6%E8%AE%B0%E5%BD%95",
+      "title": "春秋云镜Time打靶记录",
+      "link": "https://blog.rycarl.cn/archives/%E6%98%A5%E7%A7%8B%E4%BA%91%E9%95%9Ctime%E6%89%93%E9%9D%B6%E8%AE%B0%E5%BD%95",
+      "summary": "文章记录了一次完整的域渗透测试过程，最终成功控制域控。攻击者首先通过CVE-2021-34371漏洞攻击Neo4j数据库获得初始立足点，随后转向内网渗透。利用SQLmap对后台登录点进行注入，意外获取大量域用户凭证。在此基础上，实施Kerberos AS-REP Roasting攻击，获得无需预认证用户的加密凭证并成功爆破出明文密码。通过RDP登录Windows主机后，结合BloodHound与SIDHistory属性分析权限，发现并利用了自动登录功能留下的管理员凭据。最终，通过传递哈希攻击获取高权限，并逐步渗透至域控服务器。",
+      "author": "Rycarl",
+      "categories": [
+        "内网渗透"
+      ],
+      "publishedAt": "2026-02-22T06:08:19.000Z",
+      "image": "images/rycarl/7c2c1218a74a7085733b.webp"
+    },
+    {
+      "id": "/archives/%E6%98%A5%E7%A7%8B%E4%BA%91%E9%95%9Cexchange%E9%9D%B6%E5%9C%BA%E8%AE%B0%E5%BD%95",
+      "title": "春秋云镜exchange靶场记录",
+      "link": "https://blog.rycarl.cn/archives/%E6%98%A5%E7%A7%8B%E4%BA%91%E9%95%9Cexchange%E9%9D%B6%E5%9C%BA%E8%AE%B0%E5%BD%95",
+      "summary": "本文记录了针对部署“华夏ERP”及Exchange服务器的内网环境的一次完整渗透测试过程。攻击者利用外部8000端口华夏ERP系统的Fastjson反序列化漏洞与恶意MySQL服务器组合，成功获取服务器初始权限及flag01。随后通过内网代理与扫描，发现Exchange服务器，利用exprolog工具获取Exchange的shell并拿到flag02。通过Mimikatz抓取系统哈希，利用Exchange机器账户权限为域用户Zhangtong添加DCSync权限，进而导出域管理员哈希。最后通过哈希传递接管域控获取flag04，并利用pthexchange工具下载用户邮箱，从中找到含flag03的压缩包并通过爆破获得。全程展示了一次从",
+      "author": "Rycarl",
+      "categories": [
+        "内网渗透"
+      ],
+      "publishedAt": "2026-01-25T03:27:58.000Z",
+      "image": "images/rycarl/0e2562410360cdfc6d39.png"
+    },
+    {
+      "id": "/archives/%E5%9F%9F%E6%B8%97%E9%80%8F%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%E5%93%88%E5%B8%8C%E4%BC%A0%E9%80%92%E6%94%BB%E5%87%BB2",
+      "title": "域渗透基础学习(哈希传递攻击)(2)",
+      "link": "https://blog.rycarl.cn/archives/%E5%9F%9F%E6%B8%97%E9%80%8F%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%E5%93%88%E5%B8%8C%E4%BC%A0%E9%80%92%E6%94%BB%E5%87%BB2",
+      "summary": "本文深入探讨了域渗透中的哈希传递(PTH)攻击与Kerberos认证协议。PTH攻击允许攻击者利用窃得的NTML哈希值（无需破解明文密码）冒充用户身份，在域内横向移动。攻击流程包括获取管理员权限、导出哈希、利用工具（如Mimikatz）注入凭证并访问其他主机，最终可能控制域控。文章指出，系统补丁KB2871997限制了普通本地管理员账户的PTH，但默认Administrator账户（SID 500）仍可被利用。 Kerberos是Windows域环境的默认认证协议，旨在不安全的网络中实现安全双向认证，避免明文密码传输。其核心流程涉及客户端、认证服务(AS)、票据授权服务(TGS)和服务端的多次交互，通过发放TGT（票据授权票据）和S",
+      "author": "Rycarl",
+      "categories": [
+        "Web安全"
+      ],
+      "publishedAt": "2025-12-05T03:37:11.000Z",
+      "image": "images/rycarl/ba7823171e2590e404c1.png"
+    },
+    {
+      "id": "/archives/ld_preload%E7%BB%95disable_function%E4%BB%A5%E5%8F%8A%E5%9C%A8%E5%90%8E%E6%B8%97%E9%80%8F%E4%B8%AD%E7%9A%84%E4%BD%9C%E7%94%A8-2",
+      "title": "LD_PRELOAD绕disable_function以及在后渗透中的作用",
+      "link": "https://blog.rycarl.cn/archives/ld_preload%E7%BB%95disable_function%E4%BB%A5%E5%8F%8A%E5%9C%A8%E5%90%8E%E6%B8%97%E9%80%8F%E4%B8%AD%E7%9A%84%E4%BD%9C%E7%94%A8-2",
+      "summary": "LD_PRELOAD 是 Linux 环境变量，用于在程序启动前优先加载指定的共享库，从而覆盖标准库函数（如 `rand`, `geteuid`）的行为，实现函数劫持。文章通过一个猜数字游戏演示了如何劫持 `rand()` 函数返回固定值。此外，详细介绍了利用 LD_PRELOAD 绕过 PHP 的 disable_function 限制的方法：通过 `putenv` 设置环境变量加载恶意 so 文件，并劫持 `mail()` 函数调用的库函数（如 `geteuid`），最终执行任意命令。文中还提及了使用 `__attribute__((constructor))` 在 main 函数前执行代码，以及在渗透测试中用于后门持久化和相应",
+      "author": "Rycarl",
+      "categories": [
+        "Web安全"
+      ],
+      "publishedAt": "2025-12-03T07:43:44.000Z",
+      "image": "images/rycarl/4f4ccc0cb6198717431e.jpg"
+    },
+    {
+      "id": "/archives/%E5%9F%9F%E6%B8%97%E9%80%8F%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A01%E6%96%BD%E5%B7%A5%E4%B8%AD",
+      "title": "域渗透基础学习(1)",
+      "link": "https://blog.rycarl.cn/archives/%E5%9F%9F%E6%B8%97%E9%80%8F%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A01%E6%96%BD%E5%B7%A5%E4%B8%AD",
+      "summary": "Windows域是基于活动目录的集中管理机制，用于企业内网的身份验证、权限与资源控制。域渗透指攻击者在获取内网主机权限后，利用域认证机制与配置缺陷提升权限、横向移动，最终控制域控制器的过程。渗透基本思路包括信息收集、定位域控及获取凭证。关键步骤是通过工具（如procdump）转储lsass.exe进程内存，再使用Mimikatz从中提取明文密码或哈希，从而可能获取域管理员凭证，进而控制整个域。该方法依赖已获取的较高权限，且需注意目标系统版本可能限制明文密码缓存。",
+      "author": "Rycarl",
+      "categories": [
+        "Web安全"
+      ],
+      "publishedAt": "2025-11-28T16:45:42.000Z",
+      "image": "images/rycarl/20ece246d8f64664f4e5.png"
+    }
+  ]
+}

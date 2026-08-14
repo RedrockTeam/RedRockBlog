@@ -1,0 +1,15 @@
+{
+  "updatedAt": "2026-08-14T19:45:57.844Z",
+  "feeds": {
+    "met6": {
+      "itemCount": 20,
+      "coverCount": 11,
+      "fetchedAt": "2026-08-14T19:45:57.844Z"
+    },
+    "rycarl": {
+      "itemCount": 20,
+      "coverCount": 19,
+      "fetchedAt": "2026-08-14T19:45:57.844Z"
+    }
+  }
+}

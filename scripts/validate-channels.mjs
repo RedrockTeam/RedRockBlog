@@ -39,6 +39,15 @@ for (const [i, c] of (data.channels ?? []).entries()) {
     }
     if (!u || !/^https?:$/.test(u.protocol)) errors.push(`${at}: url 必须是 http(s) 地址`);
   }
+  if (c.rssUrl !== undefined) {
+    let rss;
+    try {
+      rss = new URL(c.rssUrl);
+    } catch {
+      rss = null;
+    }
+    if (!rss || !/^https?:$/.test(rss.protocol)) errors.push(`${at}: rssUrl 必须是 http(s) 地址`);
+  }
   if (c.enabled !== undefined && typeof c.enabled !== 'boolean') {
     errors.push(`${at}: enabled 必须是布尔值`);
   }

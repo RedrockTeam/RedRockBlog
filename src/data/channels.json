@@ -4,6 +4,7 @@
       "id": "met6",
       "name": "MeT-Blog",
       "url": "https://blog.met6.top:444/",
+      "rssUrl": "https://blog.met6.top:444/rss.xml",
       "description": "MeTerminator 的个人博客",
       "enabled": true
     },
@@ -11,6 +12,7 @@
       "id": "rycarl",
       "name": "Rycarl's little blog",
       "url": "https://blog.rycarl.cn/",
+      "rssUrl": "https://blog.rycarl.cn/rss.xml",
       "description": "Rycarl 的小博客",
       "extraOrigins": ["https://image.rycarl.cn:443"],
       "alwaysFetch": ["/links"],
