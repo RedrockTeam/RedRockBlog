@@ -33,6 +33,11 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
         ))}
       </select>
     </label>
+    <span class="nav-group">
+      <button class="ctl nav" id="back" type="button" aria-label="返回上一页" title="返回上一页">↩</button>
+      <button class="ctl nav" id="fwd" type="button" aria-label="前进" title="前进">↪</button>
+      <button class="ctl nav" id="refresh" type="button" aria-label="刷新当前页" title="刷新当前页">⟳</button>
+    </span>
   </div>
 
   <div class="screen-wrap">
@@ -178,6 +183,21 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
     color: var(--accent);
     border-color: var(--accent);
   }
+  .ctl:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .nav-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+  .ctl.nav {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
   .current {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 14px;
@@ -276,6 +296,9 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
   const syncInfo = document.getElementById('sync-info');
   const prevBtn = document.getElementById('prev');
   const nextBtn = document.getElementById('next');
+  const backBtn = document.getElementById('back');
+  const fwdBtn = document.getElementById('fwd');
+  const refreshBtn = document.getElementById('refresh');
 
   const unavailable = new Set();
 
@@ -320,6 +343,7 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 
   screen.addEventListener('load', () => {
     setTimeout(() => crt.classList.remove('on'), 220);
+    updateNavState();
   });
 
   chipsEl.addEventListener('click', (e) => {
@@ -328,6 +352,31 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
   });
   prevBtn.addEventListener('click', () => step(-1));
   nextBtn.addEventListener('click', () => step(1));
+  backBtn.addEventListener('click', () => {
+    try {
+      screen.contentWindow?.history.back();
+    } catch {
+      /* 忽略跨域等异常 */
+    }
+  });
+  fwdBtn.addEventListener('click', () => {
+    try {
+      screen.contentWindow?.history.forward();
+    } catch {
+      /* 忽略跨域等异常 */
+    }
+  });
+  refreshBtn.addEventListener('click', () => {
+    crtCh.textContent = labelOf(currentId);
+    crt.classList.add('on');
+    setTimeout(() => {
+      try {
+        screen.contentWindow?.location.reload();
+      } catch {
+        crt.classList.remove('on');
+      }
+    }, 300);
+  });
   jumpEl.addEventListener('change', () => loadChannel(jumpEl.value));
   tvEl.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight') {
@@ -347,6 +396,15 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
       fb.style.display = 'flex';
     });
   });
+
+  function updateNavState() {
+    try {
+      const len = screen.contentWindow?.history?.length || 0;
+      backBtn.disabled = len <= 1;
+    } catch {
+      backBtn.disabled = false;
+    }
+  }
 
   fetch(`${BASE}channels/status.json`)
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error('no status'))))
