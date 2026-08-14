@@ -36,9 +36,10 @@ jobs:
           # 稳定 key：每次成功运行覆盖同一个缓存条目，避免堆积 370MB 级快照，
           # 并保证增量状态（.cache/state）在下次运行一定能恢复
           # 媒体改为直链后缓存只有 HTML/CSS/JS，换前缀作废旧的大缓存
-          key: mirror-hotlink-${{ hashFiles('src/data/channels.json') }}
+          # v2：上一版缓存可能含 rycarl 超时残留的半成品状态，作废重拉
+          key: mirror-hotlink-v2-${{ hashFiles('src/data/channels.json') }}
           restore-keys: |
-            mirror-hotlink-
+            mirror-hotlink-v2-
 
       - name: Mirror and sanitize
         run: node scripts/mirror.mjs

@@ -260,15 +260,23 @@ async function httpText(url) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 20000);
   try {
-    const res = await fetch(url, { signal: ctrl.signal, redirect: 'follow' });
-    if (!res.ok) return null;
-    // 响应体读取也可能被服务器挂起，用 abort 兜底（20s 未读完则中止）
-    const bodyTimer = setTimeout(() => ctrl.abort(), 20000);
-    try {
-      return await res.text();
-    } finally {
-      clearTimeout(bodyTimer);
-    }
+    // 连接阶段也要竞速：个别友站（如 GitHub Runner 访问国内站）握手可能一直挂起
+    const res = await Promise.race([
+      fetch(url, { signal: ctrl.signal, redirect: 'follow' }),
+      new Promise((resolve) => setTimeout(() => resolve(null), 20000)),
+    ]);
+    if (!res || !res.ok) return null;
+    // 响应体读取可能被服务器挂起，abort 不一定能终止 res.text()，
+    // 用 Promise.race 硬性超时，保证函数一定会收敛
+    const textPromise = res.text();
+    const text = await Promise.race([
+      textPromise,
+      new Promise((resolve) => {
+        const t = setTimeout(() => resolve(null), 25000);
+        textPromise.then(() => clearTimeout(t), () => clearTimeout(t));
+      }),
+    ]);
+    return text;
   } catch {
     return null;
   } finally {
