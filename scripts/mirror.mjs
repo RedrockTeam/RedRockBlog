@@ -17,6 +17,9 @@ const ALWAYS_FETCH = ['/', '/archives'];
 // 清洗阶段再把引用直链回原站。zip/pdf/xml 等非媒体附件仍下载。
 const REJECT_MEDIA_RE =
   '(\\?width=)|\\.(png|jpe?g|webp|gif|svg|ico|avif|bmp|apng|mp4|webm|ogv|mov|mp3|wav|ogg|oga|flac|aac|m4a|woff2?|ttf|otf|eot)([?#]|$)';
+// 单频道总时长上限：防止个别友站连接挂起导致整个 CI 卡死/进程异常退出
+// （超时按该频道失败处理，不阻塞其他频道，镜像照常部署）
+const CHANNEL_TIMEOUT_MS = 15 * 60 * 1000;
 
 const channelsData = JSON.parse(await readFile(path.join(ROOT, 'src/data/channels.json'), 'utf8'));
 const channels = (channelsData.channels ?? []).filter((c) => c.enabled !== false);
@@ -31,79 +34,84 @@ async function processChannel(channel) {
   const prefix = `${prefixRoot}/${id}`;
   const entry = { id, name: channel.name, url: channel.url };
 
-  // 清理缓存中无扩展名的页面文件：wget -E 会把它们存成 .html，
-  // 旧的同名文件会阻塞分页目录（如 /tags/x/page/2）
-  await cleanStaleCache(cacheDir);
-
-  let hostDir = await findHostDir(cacheDir);
-  let mode = 'full';
-  let fetched = 0;
-  let deleted = 0;
-
-  // 缓存目录为空（首次 / 缓存丢失）时，先全量抓取并播种状态
-  if (!hostDir) {
-    const args = [
-      '-m', '-p', '-np', '-E', '-nv', '--no-remove-listing',
-      '--timeout=30', '--tries=3', '--reject-regex', REJECT_MEDIA_RE,
-      '-P', cacheDir, channel.url,
-    ];
-    if (process.env.MIRROR_QUICK) args.push('--level=2');
-    let lastErr = '';
-    for (let attempt = 1; attempt <= 2 && !hostDir; attempt += 1) {
-      const capture = attempt === 2;
-      const res = spawnSync('wget', args, {
-        stdio: capture ? ['ignore', 'inherit', 'pipe'] : 'inherit',
-      });
-      if (res.error) lastErr = res.error.message;
-      else if (res.status !== 0) lastErr = `wget 退出码 ${res.status}`;
-      if (capture && res.stderr) {
-        const tail = res.stderr.toString('utf8').trim().split('\n').slice(-8).join('\n');
-        if (tail) lastErr += `\n${tail}`;
-      }
-      hostDir = await findHostDir(cacheDir);
-      if (!hostDir && attempt === 1) console.warn(`[${id}] 第 1 次抓取失败，重试中…`);
-    }
-    // 拉取失败直接丢弃该频道：不生成镜像目录、不部署旧缓存
-    if (!hostDir) {
-      entry.error = lastErr ? `抓取失败：${lastErr}` : '抓取失败：未产生镜像目录';
-      console.error(`[${id}] ${entry.error}`);
-      return entry;
-    }
-    await seedState(channel, hostDir);
-  }
-
-  const incremental = await tryIncremental(channel, cacheDir);
-  if (incremental && incremental.mode === 'incremental') {
-    hostDir = await findHostDir(cacheDir);
-    if (hostDir) {
-      mode = 'incremental';
-      fetched = incremental.fetched;
-      deleted = incremental.deleted;
-    }
-  }
-
   try {
-    await sanitizeChannel({
-      hostDir,
-      outDir,
-      id,
-      origin: channel.url,
-      prefix,
-      base: base || '',
-      extraOrigins: channel.extraOrigins || [],
-    });
-    // 镜像产物已无媒体；顺手清掉缓存里的旧媒体文件，避免 Actions 缓存滞留
-    await purgeMediaFiles(hostDir);
-    const { sizeBytes, fileCount } = await dirStats(outDir);
-    entry.sizeBytes = sizeBytes;
-    entry.fileCount = fileCount;
-    entry.mode = mode;
-    entry.fetched = fetched;
-    entry.deleted = deleted;
-    const detail = mode === 'incremental' ? `增量（新拉 ${fetched} 页、删除 ${deleted} 页）` : '全量';
-    console.log(`[${id}] ${detail}：${fileCount} 个文件，${(sizeBytes / 1048576).toFixed(1)} MB`);
+    // 清理缓存中无扩展名的页面文件：wget -E 会把它们存成 .html，
+    // 旧的同名文件会阻塞分页目录（如 /tags/x/page/2）
+    await cleanStaleCache(cacheDir);
+
+    let hostDir = await findHostDir(cacheDir);
+    let mode = 'full';
+    let fetched = 0;
+    let deleted = 0;
+
+    // 缓存目录为空（首次 / 缓存丢失）时，先全量抓取并播种状态
+    if (!hostDir) {
+      const args = [
+        '-m', '-p', '-np', '-E', '-nv', '--no-remove-listing',
+        '--timeout=30', '--tries=3', '--reject-regex', REJECT_MEDIA_RE,
+        '-P', cacheDir, channel.url,
+      ];
+      if (process.env.MIRROR_QUICK) args.push('--level=2');
+      let lastErr = '';
+      for (let attempt = 1; attempt <= 2 && !hostDir; attempt += 1) {
+        const capture = attempt === 2;
+        const res = spawnSync('wget', args, {
+          stdio: capture ? ['ignore', 'inherit', 'pipe'] : 'inherit',
+        });
+        if (res.error) lastErr = res.error.message;
+        else if (res.status !== 0) lastErr = `wget 退出码 ${res.status}`;
+        if (capture && res.stderr) {
+          const tail = res.stderr.toString('utf8').trim().split('\n').slice(-8).join('\n');
+          if (tail) lastErr += `\n${tail}`;
+        }
+        hostDir = await findHostDir(cacheDir);
+        if (!hostDir && attempt === 1) console.warn(`[${id}] 第 1 次抓取失败，重试中…`);
+      }
+      // 拉取失败直接丢弃该频道：不生成镜像目录、不部署旧缓存
+      if (!hostDir) {
+        entry.error = lastErr ? `抓取失败：${lastErr}` : '抓取失败：未产生镜像目录';
+        console.error(`[${id}] ${entry.error}`);
+        return entry;
+      }
+      await seedState(channel, hostDir);
+    }
+
+    const incremental = await tryIncremental(channel, cacheDir);
+    if (incremental && incremental.mode === 'incremental') {
+      hostDir = await findHostDir(cacheDir);
+      if (hostDir) {
+        mode = 'incremental';
+        fetched = incremental.fetched;
+        deleted = incremental.deleted;
+      }
+    }
+
+    try {
+      await sanitizeChannel({
+        hostDir,
+        outDir,
+        id,
+        origin: channel.url,
+        prefix,
+        base: base || '',
+        extraOrigins: channel.extraOrigins || [],
+      });
+      // 镜像产物已无媒体；顺手清掉缓存里的旧媒体文件，避免 Actions 缓存滞留
+      await purgeMediaFiles(hostDir);
+      const { sizeBytes, fileCount } = await dirStats(outDir);
+      entry.sizeBytes = sizeBytes;
+      entry.fileCount = fileCount;
+      entry.mode = mode;
+      entry.fetched = fetched;
+      entry.deleted = deleted;
+      const detail = mode === 'incremental' ? `增量（新拉 ${fetched} 页、删除 ${deleted} 页）` : '全量';
+      console.log(`[${id}] ${detail}：${fileCount} 个文件，${(sizeBytes / 1048576).toFixed(1)} MB`);
+    } catch (e) {
+      entry.error = `清洗失败：${e.message}`;
+      console.error(`[${id}] ${entry.error}`);
+    }
   } catch (e) {
-    entry.error = `清洗失败：${e.message}`;
+    entry.error = `处理异常：${e.message}`;
     console.error(`[${id}] ${entry.error}`);
   }
   return entry;
@@ -254,7 +262,13 @@ async function httpText(url) {
   try {
     const res = await fetch(url, { signal: ctrl.signal, redirect: 'follow' });
     if (!res.ok) return null;
-    return await res.text();
+    // 响应体读取也可能被服务器挂起，用 abort 兜底（20s 未读完则中止）
+    const bodyTimer = setTimeout(() => ctrl.abort(), 20000);
+    try {
+      return await res.text();
+    } finally {
+      clearTimeout(bodyTimer);
+    }
   } catch {
     return null;
   } finally {
@@ -310,9 +324,33 @@ async function findHostDir(cacheDir) {
 
 const CONCURRENCY = Math.min(3, channels.length);
 let next = 0;
+
+// 看门狗：单频道超时按失败处理，保证 Promise.all 一定会收敛，
+// 避免个别友站连接挂起导致 Node "未决 top-level await" 退出（exit 13）
+async function processChannelWithTimeout(channel) {
+  try {
+    return await Promise.race([
+      processChannel(channel),
+      new Promise((resolve) =>
+        setTimeout(() => {
+          console.error(`[${channel.id}] 处理超时（超过 ${CHANNEL_TIMEOUT_MS / 60000} 分钟），跳过`);
+          resolve({
+            id: channel.id,
+            name: channel.name,
+            url: channel.url,
+            error: `处理超时（超过 ${CHANNEL_TIMEOUT_MS / 60000} 分钟）`,
+          });
+        }, CHANNEL_TIMEOUT_MS),
+      ),
+    ]);
+  } catch (e) {
+    return { id: channel.id, name: channel.name, url: channel.url, error: `处理异常：${e.message}` };
+  }
+}
+
 async function worker() {
   while (next < channels.length) {
-    const entry = await processChannel(channels[next++]);
+    const entry = await processChannelWithTimeout(channels[next++]);
     status.channels[entry.id] = entry;
   }
 }
@@ -320,6 +358,8 @@ await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
 
 await writeFile(path.join(outRoot, 'status.json'), JSON.stringify(status, null, 2));
 console.log('镜像状态已写入 public/channels/status.json');
+// 兜底：清理可能残存的连接句柄，避免进程被挂起的 socket 拖住
+process.exit(0);
 
 async function dirStats(dir) {
   let sizeBytes = 0;
