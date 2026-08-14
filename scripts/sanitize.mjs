@@ -19,13 +19,25 @@ function rewriteRoot(value, prefix) {
   return clean;
 }
 
+// 源站可能引用预压缩的 .css.gz / .js.gz（含带查询串形式），镜像里只有未压缩版，去掉 .gz
+function rewriteAssetExt(value) {
+  return typeof value === 'string'
+    ? value.replace(/(\.(?:css|js)(?:(?:[?#]|%3[fF])[^"'\s]*)?)\.gz$/i, '$1')
+    : value;
+}
+
+function cleanRef(value, prefix) {
+  if (typeof value !== 'string') return value;
+  return rewriteAssetExt(rewriteRoot(value, prefix));
+}
+
 function rewriteSrcset(value, prefix) {
   return value
     .split(',')
     .map((part) => {
       const m = part.trim().match(/^(\S+)(\s+.+)?$/);
       if (!m) return part;
-      return rewriteRoot(m[1], prefix).replace(/\?width=[^&]*/, '') + (m[2] ?? '');
+      return cleanRef(m[1], prefix) + (m[2] ?? '');
     })
     .join(', ');
 }
@@ -57,7 +69,7 @@ async function looksLikeHtml(file) {
 
 function rewriteJsonStrings(node, prefix) {
   if (typeof node === 'string') {
-    return rewriteRoot(node, prefix);
+    return cleanRef(node, prefix);
   }
   if (Array.isArray(node)) {
     return node.map((v) => rewriteJsonStrings(v, prefix));
@@ -113,12 +125,12 @@ async function sanitizeHtml(file, { origin, prefix, base, outDir }) {
 
   $('[href]').each((_, el) => {
     const v = $(el).attr('href');
-    const nv = rewriteRoot(v, prefix);
+    const nv = cleanRef(v, prefix);
     if (nv !== v) $(el).attr('href', nv);
   });
   $('[src]').each((_, el) => {
     const v = $(el).attr('src');
-    const nv = rewriteRoot(v, prefix);
+    const nv = cleanRef(v, prefix);
     if (nv !== v) $(el).attr('src', nv);
   });
   $('[srcset]').each((_, el) => {
@@ -126,7 +138,7 @@ async function sanitizeHtml(file, { origin, prefix, base, outDir }) {
   });
   $('[data-src]').each((_, el) => {
     const v = $(el).attr('data-src');
-    const nv = rewriteRoot(v, prefix);
+    const nv = cleanRef(v, prefix);
     if (nv !== v) $(el).attr('data-src', nv);
   });
   $('[action]').each((_, el) => {
@@ -136,7 +148,7 @@ async function sanitizeHtml(file, { origin, prefix, base, outDir }) {
   });
   $('meta[property^="og:"], meta[name^="twitter:"]').each((_, el) => {
     const v = $(el).attr('content');
-    const nv = rewriteRoot(v, prefix);
+    const nv = cleanRef(v, prefix);
     if (nv !== v) $(el).attr('content', nv);
   });
   $('[style]').each((_, el) => {
@@ -173,7 +185,10 @@ async function sanitizeHtml(file, { origin, prefix, base, outDir }) {
 
   html = $.html();
   // 处理内联 JS 中带引号的根绝对路径（themeConfig 等）
-  html = html.replace(KNOWN_ROOT_RE, `$1${prefix}/$2/`);
+  html = html.replace(
+    KNOWN_ROOT_RE,
+    (m, q, dir, rest) => `${q}${prefix}/${dir}/${rewriteAssetExt(rest)}`,
+  );
   await writeFile(file, html, 'utf8');
   return faviconPath;
 }
@@ -181,12 +196,16 @@ async function sanitizeHtml(file, { origin, prefix, base, outDir }) {
 async function sanitizeCss(file, prefix) {
   let css = await readFile(file, 'utf8');
   css = css.replace(/(url\(\s*['"]?)\//g, `$1${prefix}/`);
+  css = css.replace(/(url\(\s*['"]?)([^)'"]+)/g, (m, pre, p) => pre + rewriteAssetExt(p));
   await writeFile(file, css, 'utf8');
 }
 
 async function sanitizeJs(file, prefix) {
   let js = await readFile(file, 'utf8');
-  js = js.replace(KNOWN_ROOT_RE, `$1${prefix}/$2/`);
+  js = js.replace(
+    KNOWN_ROOT_RE,
+    (m, q, dir, rest) => `${q}${prefix}/${dir}/${rewriteAssetExt(rest)}`,
+  );
   await writeFile(file, js, 'utf8');
 }
 
