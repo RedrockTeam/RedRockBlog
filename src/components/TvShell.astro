@@ -294,6 +294,7 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 
   function loadChannel(id) {
     if (unavailable.has(id)) return;
+    currentId = id;
     setActive(id);
     const target = `${BASE}channels/${id}/`;
     const name = channels[indexOf(id)].name;
