@@ -23,7 +23,6 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 
   <div class="controls">
     <button class="ctl" id="prev" type="button" aria-label="上一个频道">◀</button>
-    <span class="current" id="current-label">CH-01</span>
     <button class="ctl" id="next" type="button" aria-label="下一个频道">▶</button>
     <label class="jump">
       跳转到
@@ -33,6 +32,7 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
         ))}
       </select>
     </label>
+    <span class="current" id="current-label">CH-01</span>
     <span class="nav-group">
       <button class="ctl nav" id="back" type="button" aria-label="返回上一页" title="返回上一页">↩</button>
       <button class="ctl nav" id="fwd" type="button" aria-label="前进" title="前进">↪</button>
@@ -191,7 +191,6 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-left: auto;
   }
   .ctl.nav {
     width: 32px;
@@ -202,7 +201,7 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 14px;
     color: var(--muted);
-    min-width: 130px;
+    margin-left: auto;
   }
   .jump {
     display: flex;
