@@ -17,7 +17,7 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
       <a class="site-logo" href={BASE}>RedRock</a>
       <nav class="site-nav">
         <a href={BASE}>首页</a>
-        <a href={`${BASE}tv/`}>友链电视</a>
+        <a href={`${BASE}tv/`}>友链放送</a>
         <a class="apply" href="https://github.com/RedrockTeam/RedRockBlog/pulls" target="_blank" rel="noopener">申请加入</a>
       </nav>
     </header>
@@ -25,7 +25,7 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
       <slot />
     </main>
     <footer class="site-footer">
-      <p>友链电视为各博客的静态镜像，仅作展示；完整功能请访问原站。</p>
+      <p>文章来自友链博客公开 RSS 的定时缓存；阅读全文请访问原站。</p>
       <p><a href="https://github.com/RedrockTeam/RedRockBlog" target="_blank" rel="noopener">RedRock Blog · GitHub</a></p>
     </footer>
     <style>

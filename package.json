@@ -7,6 +7,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "rss": "node scripts/rss.mjs",
     "mirror": "node scripts/mirror.mjs",
     "validate:channels": "node scripts/validate-channels.mjs"
   },

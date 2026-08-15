@@ -1,241 +1,408 @@
 ---
 import channelsData from '../data/channels.json';
 
-const channels = channelsData.channels.filter((c) => c.enabled !== false);
+const channels = channelsData.channels.filter((channel) => channel.enabled !== false);
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 ---
 
-<div class="tv" id="tv" tabindex="0">
-  <ul class="chips" id="chips">
-    {channels.map((c) => (
-      <li class="chip">
-        <button class="chip-btn" data-id={c.id} type="button">
-          <span class="avatar">
-            <img src={`${BASE}channels/${c.id}/favicon.ico`} alt="" loading="lazy" />
-            <span class="avatar-fallback">{c.name.charAt(0)}</span>
-          </span>
-          <span class="chip-name">{c.name}</span>
-        </button>
-        <a class="origin" href={c.url} target="_blank" rel="noopener" title="访问原站">原站 ↗</a>
-      </li>
-    ))}
-  </ul>
-
-  <div class="controls">
-    <button class="ctl" id="prev" type="button" aria-label="上一个频道">◀</button>
-    <span class="channel-no" id="channel-no">CH-01</span>
-    <button class="ctl" id="next" type="button" aria-label="下一个频道">▶</button>
-    <label class="jump">
-      跳转到
-      <select id="jump">
-        {channels.map((c, i) => (
-          <option value={c.id}>{String(i + 1).padStart(2, '0')} {c.name}</option>
+<section class="reader" id="reader">
+  <header class="reader-head">
+    <div>
+      <p class="eyebrow">REDROCK · FRIEND READER</p>
+      <h1>友链阅读器</h1>
+      <p>左侧浏览 RSS 文章，点击后在新标签页打开原文；右侧保留网站缓存预览。</p>
+    </div>
+    <label class="channel-select">
+      <span>当前频道</span>
+      <select id="channel-select">
+        {channels.map((channel, index) => (
+          <option value={channel.id}>
+            {String(index + 1).padStart(2, '0')} · {channel.name}
+          </option>
         ))}
       </select>
     </label>
-    <span class="current" id="current-label">CH-01</span>
-    <span class="nav-group">
-      <button class="ctl nav" id="back" type="button" aria-label="返回上一页" title="返回上一页">↩</button>
-      <button class="ctl nav" id="fwd" type="button" aria-label="前进" title="前进">↪</button>
-      <button class="ctl nav" id="refresh" type="button" aria-label="刷新当前页" title="刷新当前页">⟳</button>
-    </span>
+  </header>
+
+  <nav class="channel-tabs" id="channel-tabs" aria-label="博客频道">
+    {channels.map((channel, index) => (
+      <button class="channel-tab" data-id={channel.id} type="button">
+        <span>{String(index + 1).padStart(2, '0')}</span>
+        <strong>{channel.name}</strong>
+        {!channel.rssUrl && <small>仅预览</small>}
+      </button>
+    ))}
+  </nav>
+
+  <div class="workspace" id="workspace">
+    <aside class="feed-pane" id="feed-pane" aria-label="RSS 文章列表">
+      <header class="feed-head">
+        <div>
+          <p class="pane-label">RSS ARTICLES</p>
+          <h2 id="feed-title">文章</h2>
+        </div>
+        <a id="rss-link" href="#" target="_blank" rel="noopener" title="打开 RSS">RSS ↗</a>
+      </header>
+
+      <div class="feed-body">
+        <div class="feed-loading" id="feed-loading" role="status">
+          <span></span><span></span><span></span>
+          <p>正在读取 RSS 缓存…</p>
+        </div>
+        <div class="feed-error" id="feed-error" hidden>
+          <strong>RSS 缓存暂不可用</strong>
+          <p id="feed-error-message">请稍后再试。</p>
+        </div>
+        <div class="article-list" id="article-list" aria-live="polite"></div>
+      </div>
+
+      <footer class="feed-foot">
+        <span id="article-count">— 篇</span>
+        <span id="rss-cache-time">缓存读取中…</span>
+      </footer>
+    </aside>
+
+    <section class="preview-pane" aria-label="网站缓存预览">
+      <header class="preview-toolbar">
+        <div class="preview-heading">
+          <p class="pane-label">CACHED PREVIEW</p>
+          <strong id="preview-title">网站首页</strong>
+        </div>
+        <div class="preview-actions">
+          <button id="preview-home" type="button" title="返回镜像首页" aria-label="返回镜像首页">⌂</button>
+          <button id="preview-back" type="button" title="后退" aria-label="后退">←</button>
+          <button id="preview-forward" type="button" title="前进" aria-label="前进">→</button>
+          <button id="preview-refresh" type="button" title="刷新" aria-label="刷新">↻</button>
+          <a id="origin-link" href="#" target="_blank" rel="noopener">原文 ↗</a>
+        </div>
+      </header>
+
+      <div class="screen-wrap">
+        <div class="screen-loading" id="screen-loading" aria-hidden="true">
+          <span id="screen-channel">CH-01</span>
+        </div>
+        <iframe
+          class="screen"
+          id="screen"
+          title="友链网站缓存预览"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          referrerpolicy="no-referrer"
+        ></iframe>
+      </div>
+
+      <footer class="preview-foot">
+        <span id="mirror-status">镜像状态读取中…</span>
+        <span>静态缓存 · 交互功能可能受限</span>
+      </footer>
+    </section>
   </div>
+</section>
 
-  <div class="screen-wrap">
-    <div class="crt" id="crt">
-      <div class="crt-noise"></div>
-      <div class="crt-ch" id="crt-ch">CH-01</div>
-    </div>
-    <iframe
-      class="screen"
-      id="screen"
-      title="友链频道"
-      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-      referrerpolicy="no-referrer"
-    ></iframe>
-  </div>
-
-  <div class="sync" id="sync-info">同步状态加载中…</div>
-</div>
-
-<style>
-  .tv {
-    max-width: 960px;
+<style is:global>
+  .reader {
+    --surface: #11151a;
+    --surface-2: #171c22;
+    max-width: 1120px;
     margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    outline: none;
   }
-  .chips {
-    list-style: none;
+  .reader-head {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 0;
-    margin: 0;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 22px;
   }
-  .chip {
-    display: flex;
-    align-items: center;
+  .reader-head h1 {
+    margin: 3px 0 8px;
+    font-size: clamp(34px, 6vw, 56px);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  .reader-head > div > p:last-child {
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .eyebrow,
+  .pane-label {
+    color: var(--accent);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+  }
+  .channel-select {
+    display: grid;
+    flex: 0 0 240px;
     gap: 4px;
-    padding: 4px;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: var(--panel);
   }
-  .chip-btn {
+  .channel-select span {
+    color: var(--muted);
+    font-size: 10px;
+  }
+  .channel-select select {
+    width: 100%;
+    height: 40px;
+    padding: 0 34px 0 11px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--fg);
+    font: inherit;
+  }
+  .channel-tabs {
+    display: flex;
+    gap: 8px;
+    padding-bottom: 12px;
+    overflow-x: auto;
+  }
+  .channel-tab {
     display: flex;
     align-items: center;
     gap: 8px;
-    border: 0;
-    background: none;
-    color: inherit;
+    min-height: 38px;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--fg);
     font: inherit;
     cursor: pointer;
-    padding: 6px 10px;
-    border-radius: 999px;
+    white-space: nowrap;
   }
-  .chip-btn:hover {
-    background: #1b2027;
+  .channel-tab:hover,
+  .channel-tab.active {
+    border-color: var(--accent);
   }
-  .chip-btn.active {
-    background: #232a33;
-    box-shadow: inset 0 0 0 1px var(--accent);
+  .channel-tab.active {
+    background: rgba(245, 197, 24, 0.08);
   }
-  .chip-btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
+  .channel-tab span,
+  .channel-tab small {
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 9px;
   }
-  .avatar {
-    position: relative;
-    flex: 0 0 26px;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
+  .channel-tab strong {
+    font-size: 12px;
+  }
+  .workspace {
+    display: grid;
+    grid-template-columns: minmax(250px, 3fr) minmax(0, 7fr);
+    min-height: 640px;
+    height: min(76vh, 860px);
     overflow: hidden;
-    background: #2a313a;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+  }
+  .workspace.no-rss {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .workspace.no-rss .feed-pane {
+    display: none;
+  }
+  .feed-pane,
+  .preview-pane {
+    min-width: 0;
+    min-height: 0;
+  }
+  .feed-pane {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    border-right: 1px solid var(--border);
+    background: #0e1115;
+  }
+  .feed-head,
+  .preview-toolbar {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 66px;
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border);
   }
-  .avatar img {
+  .feed-head h2 {
+    margin-top: 2px;
+    overflow: hidden;
+    font-size: 16px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .feed-head a {
+    color: var(--muted);
+    font-size: 10px;
+  }
+  .feed-head a:hover {
+    color: var(--accent);
+  }
+  .article-list {
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #343b45 transparent;
+  }
+  .feed-body {
+    min-height: 0;
+    overflow: hidden;
+  }
+  .article-entry {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 10px;
+    width: 100%;
+    padding: 12px 13px;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    color: var(--fg);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .article-entry.no-cover {
+    grid-template-columns: 1fr;
+  }
+  .article-entry:hover {
+    background: var(--surface-2);
+  }
+  .article-thumb {
+    width: 72px;
+    height: 52px;
+    overflow: hidden;
+    border-radius: 7px;
+    background: #080a0c;
+  }
+  .article-thumb img {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
-  .avatar-fallback {
-    display: none;
-    width: 100%;
+  .article-copy {
+    min-width: 0;
+  }
+  .article-date {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 9px;
+  }
+  .article-title {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.45;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .article-summary {
+    margin-top: 5px;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .feed-foot,
+  .preview-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 34px;
+    padding: 8px 13px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 9px;
+  }
+  .feed-loading,
+  .feed-error {
+    display: flex;
     height: 100%;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    color: var(--accent);
-  }
-  .chip-name {
-    font-size: 13px;
-    white-space: nowrap;
-  }
-  .origin {
-    font-size: 12px;
+    flex-direction: column;
+    gap: 6px;
+    padding: 24px;
     color: var(--muted);
-    text-decoration: none;
-    padding: 2px 6px;
-    border-radius: 6px;
-    white-space: nowrap;
-  }
-  .origin:hover {
-    color: var(--accent);
-  }
-  .status {
-    margin-left: 4px;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 999px;
-    white-space: nowrap;
-  }
-  .status.ok {
-    color: #7ee2a8;
-    background: rgba(61, 220, 133, 0.12);
-  }
-  .status.err {
-    color: #ff9d9d;
-    background: rgba(255, 80, 80, 0.12);
-  }
-  .controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .ctl {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    background: var(--panel);
-    color: var(--fg);
-    font-size: 15px;
-    cursor: pointer;
-    line-height: 1;
-  }
-  .ctl:hover {
-    color: var(--accent);
-    border-color: var(--accent);
-  }
-  .ctl:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
-  .channel-no {
-    flex: 0 0 64px;
-    width: 64px;
     text-align: center;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 14px;
-    letter-spacing: 1px;
-    color: var(--muted);
+    font-size: 11px;
   }
-  .nav-group {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+  .feed-loading > span {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: feed-pulse 0.8s ease-in-out infinite alternate;
   }
-  .ctl.nav {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
+  .feed-loading > span:nth-child(2) {
+    animation-delay: 0.16s;
   }
-  .current {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 14px;
-    color: var(--muted);
-    margin-left: auto;
+  .feed-loading > span:nth-child(3) {
+    animation-delay: 0.32s;
   }
-  .jump {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: var(--muted);
-  }
-  .jump select {
-    background: var(--panel);
+  .feed-error strong {
     color: var(--fg);
+  }
+  .feed-loading[hidden],
+  .feed-error[hidden] {
+    display: none;
+  }
+  .preview-pane {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    background: #080a0c;
+  }
+  .preview-toolbar {
+    background: var(--surface);
+  }
+  .preview-heading {
+    min-width: 0;
+  }
+  .preview-heading strong {
+    display: block;
+    max-width: min(42vw, 460px);
+    margin-top: 2px;
+    overflow: hidden;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .preview-actions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .preview-actions button,
+  .preview-actions a {
+    display: grid;
+    place-items: center;
+    height: 30px;
+    min-width: 30px;
+    padding: 0 8px;
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 6px 8px;
+    border-radius: 7px;
+    background: #0d1014;
+    color: var(--muted);
     font: inherit;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .preview-actions button:hover,
+  .preview-actions a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
   }
   .screen-wrap {
     position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    background: #000;
-    border-radius: 12px;
+    min-height: 0;
     overflow: hidden;
-    border: 1px solid var(--border);
   }
   .screen {
     position: absolute;
@@ -245,209 +412,247 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
     border: 0;
     background: #fff;
   }
-  .crt {
+  .screen-loading {
     position: absolute;
     inset: 0;
-    z-index: 50;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #000;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    background: #050607;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.12s;
+    transition: opacity 0.12s ease;
   }
-  .crt.on {
+  .screen-loading.on {
     opacity: 1;
   }
-  .crt-noise {
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    animation: mh-noise 0.25s steps(3) infinite;
-  }
-  .crt-ch {
-    position: relative;
+  .screen-loading span {
+    color: rgba(255, 255, 255, 0.15);
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: clamp(48px, 12vw, 140px);
+    font-size: clamp(42px, 9vw, 96px);
     font-weight: 800;
-    color: rgba(255, 255, 255, 0.14);
-    letter-spacing: 2px;
   }
-  .sync {
-    font-size: 12px;
-    color: var(--muted);
+  .preview-foot {
+    background: var(--surface);
   }
-  @keyframes mh-noise {
-    0% {
-      background-position: 0 0;
+  @keyframes feed-pulse {
+    to {
+      opacity: 0.2;
+      transform: translateY(-3px);
     }
-    33% {
-      background-position: -60px 40px;
+  }
+  @media (max-width: 760px) {
+    .reader-head {
+      align-items: stretch;
+      flex-direction: column;
     }
-    66% {
-      background-position: 40px -80px;
+    .channel-select {
+      flex-basis: auto;
     }
-    100% {
-      background-position: -20px -30px;
+    .workspace {
+      grid-template-columns: 1fr;
+      height: auto;
+      min-height: 0;
+      overflow: visible;
+    }
+    .feed-pane {
+      height: 360px;
+      border-right: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .preview-pane {
+      height: 68vh;
+      min-height: 520px;
+    }
+    .workspace.no-rss .preview-pane {
+      height: 74vh;
+    }
+    .preview-heading strong {
+      max-width: 38vw;
+    }
+    .preview-actions a {
+      display: none;
     }
   }
 </style>
 
 <script define:vars={{ channels, BASE }}>
-  const tvEl = document.getElementById('tv');
+  const workspace = document.getElementById('workspace');
+  const channelSelect = document.getElementById('channel-select');
+  const channelTabs = [...document.querySelectorAll('.channel-tab')];
+  const feedTitle = document.getElementById('feed-title');
+  const rssLink = document.getElementById('rss-link');
+  const feedLoading = document.getElementById('feed-loading');
+  const feedError = document.getElementById('feed-error');
+  const feedErrorMessage = document.getElementById('feed-error-message');
+  const articleList = document.getElementById('article-list');
+  const articleCount = document.getElementById('article-count');
+  const rssCacheTime = document.getElementById('rss-cache-time');
   const screen = document.getElementById('screen');
-  const crt = document.getElementById('crt');
-  const crtCh = document.getElementById('crt-ch');
-  const channelNo = document.getElementById('channel-no');
-  const chipsEl = document.getElementById('chips');
-  const jumpEl = document.getElementById('jump');
-  const currentLabel = document.getElementById('current-label');
-  const syncInfo = document.getElementById('sync-info');
-  const prevBtn = document.getElementById('prev');
-  const nextBtn = document.getElementById('next');
-  const backBtn = document.getElementById('back');
-  const fwdBtn = document.getElementById('fwd');
-  const refreshBtn = document.getElementById('refresh');
-
-  const unavailable = new Set();
+  const screenLoading = document.getElementById('screen-loading');
+  const screenChannel = document.getElementById('screen-channel');
+  const previewTitle = document.getElementById('preview-title');
+  const originLink = document.getElementById('origin-link');
+  const mirrorStatus = document.getElementById('mirror-status');
+  const previewHome = document.getElementById('preview-home');
+  const previewBack = document.getElementById('preview-back');
+  const previewForward = document.getElementById('preview-forward');
+  const previewRefresh = document.getElementById('preview-refresh');
 
   let currentId = new URLSearchParams(location.search).get('ch');
-  if (!channels.some((c) => c.id === currentId)) currentId = channels[0].id;
+  if (!channels.some((channel) => channel.id === currentId)) currentId = channels[0].id;
+  let currentChannel = channels.find((channel) => channel.id === currentId);
+  let feedRequest = 0;
 
-  const indexOf = (id) => channels.findIndex((c) => c.id === id);
-  const enabled = () => channels.filter((c) => !unavailable.has(c.id));
-  const labelOf = (id) => `CH-${String(indexOf(id) + 1).padStart(2, '0')}`;
-
-  function setActive(id) {
-    document.querySelectorAll('.chip-btn').forEach((b) => {
-      b.classList.toggle('active', b.dataset.id === id);
-    });
+  function channelNumber(id) {
+    return String(channels.findIndex((channel) => channel.id === id) + 1).padStart(2, '0');
   }
 
-  function loadChannel(id) {
-    if (unavailable.has(id)) return;
+  function mirrorHome(channel = currentChannel) {
+    return `${BASE}channels/${channel.id}/`;
+  }
+
+  function setPreview(url, title, originalUrl) {
+    previewTitle.textContent = title;
+    originLink.href = originalUrl || currentChannel.url;
+    screenLoading.classList.add('on');
+    screen.src = url;
+  }
+
+  function selectChannel(id) {
+    const channel = channels.find((candidate) => candidate.id === id);
+    if (!channel) return;
     currentId = id;
-    setActive(id);
-    const target = `${BASE}channels/${id}/`;
-    const name = channels[indexOf(id)].name;
-    channelNo.textContent = labelOf(id);
-    currentLabel.textContent = name;
-    jumpEl.value = id;
-    if (screen.dataset.loaded !== id) {
-      crtCh.textContent = labelOf(id);
-      crt.classList.add('on');
-      setTimeout(() => {
-        screen.src = target;
-      }, 340);
-    }
-    screen.dataset.loaded = id;
-    history.replaceState(null, '', `?ch=${id}`);
-  }
-
-  function step(delta) {
-    const list = enabled();
-    if (!list.length) return;
-    const i = list.findIndex((c) => c.id === currentId);
-    loadChannel(list[(i + delta + list.length) % list.length].id);
-  }
-
-  screen.addEventListener('load', () => {
-    setTimeout(() => crt.classList.remove('on'), 220);
-    updateNavState();
-  });
-
-  chipsEl.addEventListener('click', (e) => {
-    const btn = e.target.closest('.chip-btn');
-    if (btn) loadChannel(btn.dataset.id);
-  });
-  prevBtn.addEventListener('click', () => step(-1));
-  nextBtn.addEventListener('click', () => step(1));
-  backBtn.addEventListener('click', () => {
-    try {
-      screen.contentWindow?.history.back();
-    } catch {
-      /* 忽略跨域等异常 */
-    }
-  });
-  fwdBtn.addEventListener('click', () => {
-    try {
-      screen.contentWindow?.history.forward();
-    } catch {
-      /* 忽略跨域等异常 */
-    }
-  });
-  refreshBtn.addEventListener('click', () => {
-    crtCh.textContent = labelOf(currentId);
-    crt.classList.add('on');
-    setTimeout(() => {
-      try {
-        screen.contentWindow?.location.reload();
-      } catch {
-        crt.classList.remove('on');
-      }
-    }, 300);
-  });
-  jumpEl.addEventListener('change', () => loadChannel(jumpEl.value));
-  tvEl.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight') {
-      e.preventDefault();
-      step(1);
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      step(-1);
-    }
-  });
-
-  document.querySelectorAll('.avatar').forEach((a) => {
-    const img = a.querySelector('img');
-    const fb = a.querySelector('.avatar-fallback');
-    img.addEventListener('error', () => {
-      img.style.display = 'none';
-      fb.style.display = 'flex';
+    currentChannel = channel;
+    channelSelect.value = id;
+    channelTabs.forEach((tab) => {
+      const active = tab.dataset.id === id;
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-current', active ? 'true' : 'false');
     });
-  });
+    history.replaceState(null, '', `?ch=${encodeURIComponent(id)}`);
+    workspace.classList.toggle('no-rss', !channel.rssUrl);
+    screenChannel.textContent = `CH-${channelNumber(id)}`;
+    articleList.replaceChildren();
+    setPreview(mirrorHome(channel), `${channel.name} · 镜像首页`, channel.url);
+    if (channel.rssUrl) loadFeed(channel);
+  }
 
-  function updateNavState() {
+  async function loadFeed(channel) {
+    const request = ++feedRequest;
+    feedTitle.textContent = channel.name;
+    rssLink.href = channel.rssUrl;
+    feedLoading.hidden = false;
+    feedError.hidden = true;
+    articleList.replaceChildren();
+    articleCount.textContent = '— 篇';
+    rssCacheTime.textContent = '缓存读取中…';
     try {
-      const len = screen.contentWindow?.history?.length || 0;
-      backBtn.disabled = len <= 1;
-    } catch {
-      backBtn.disabled = false;
+      const response = await fetch(`${BASE}rss/${channel.id}.json`);
+      if (!response.ok) throw new Error(`缓存响应异常（${response.status}）`);
+      const feed = await response.json();
+      if (request !== feedRequest || currentId !== channel.id) return;
+      renderFeed(feed);
+    } catch (error) {
+      if (request !== feedRequest || currentId !== channel.id) return;
+      feedLoading.hidden = true;
+      feedError.hidden = false;
+      feedErrorMessage.textContent = error.message || '请稍后再试。';
+      rssCacheTime.textContent = '缓存不可用';
     }
   }
+
+  function renderFeed(feed) {
+    feedLoading.hidden = true;
+    const fragment = document.createDocumentFragment();
+    for (const item of feed.items || []) {
+      const entry = document.createElement('a');
+      entry.className = 'article-entry';
+      entry.href = item.link;
+      entry.target = '_blank';
+      entry.rel = 'noopener';
+
+      if (item.image && /^images\/[a-z0-9-]+\/[a-f0-9]+\.(?:avif|gif|jpe?g|png|webp)$/i.test(item.image)) {
+        const thumb = document.createElement('span');
+        thumb.className = 'article-thumb';
+        const image = document.createElement('img');
+        image.src = `${BASE}rss/${item.image}`;
+        image.alt = '';
+        image.loading = 'lazy';
+        image.decoding = 'async';
+        image.addEventListener('error', () => {
+          thumb.remove();
+          entry.classList.add('no-cover');
+        });
+        thumb.append(image);
+        entry.append(thumb);
+      } else {
+        entry.classList.add('no-cover');
+      }
+
+      const copy = document.createElement('span');
+      copy.className = 'article-copy';
+      const date = document.createElement('time');
+      date.className = 'article-date';
+      date.dateTime = item.publishedAt || '';
+      date.textContent = formatDate(item.publishedAt);
+      const title = document.createElement('span');
+      title.className = 'article-title';
+      title.textContent = item.title;
+      copy.append(date, title);
+      if (item.summary) {
+        const summary = document.createElement('span');
+        summary.className = 'article-summary';
+        summary.textContent = item.summary;
+        copy.append(summary);
+      }
+      entry.append(copy);
+      fragment.append(entry);
+    }
+    articleList.replaceChildren(fragment);
+    articleCount.textContent = `${feed.items?.length || 0} 篇`;
+    rssCacheTime.textContent = feed.fetchedAt ? formatDateTime(feed.fetchedAt) : '缓存时间未知';
+  }
+
+  function formatDate(value) {
+    if (!value) return '日期未知';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '日期未知';
+    return date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  }
+
+  function formatDateTime(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '时间未知';
+    return `缓存 ${date.toLocaleString('zh-CN', { hour12: false })}`;
+  }
+
+  screen.addEventListener('load', () => screenLoading.classList.remove('on'));
+  channelSelect.addEventListener('change', () => selectChannel(channelSelect.value));
+  channelTabs.forEach((tab) => tab.addEventListener('click', () => selectChannel(tab.dataset.id)));
+  previewHome.addEventListener('click', () => {
+    setPreview(mirrorHome(), `${currentChannel.name} · 镜像首页`, currentChannel.url);
+  });
+  previewBack.addEventListener('click', () => {
+    try { screen.contentWindow?.history.back(); } catch { /* 镜像导航不可用时忽略 */ }
+  });
+  previewForward.addEventListener('click', () => {
+    try { screen.contentWindow?.history.forward(); } catch { /* 镜像导航不可用时忽略 */ }
+  });
+  previewRefresh.addEventListener('click', () => {
+    screenLoading.classList.add('on');
+    screen.src = screen.src;
+  });
 
   fetch(`${BASE}channels/status.json`)
-    .then((r) => (r.ok ? r.json() : Promise.reject(new Error('no status'))))
-    .then((data) => {
-      const updated = new Date(data.updatedAt).toLocaleString('zh-CN', { hour12: false });
-      syncInfo.textContent = `最后同步：${updated}`;
-      Object.entries(data.channels || {}).forEach(([id, st]) => {
-        const btn = document.querySelector(`.chip-btn[data-id="${id}"]`);
-        if (!btn) return;
-        const badge = document.createElement('span');
-        if (st.error) {
-          unavailable.add(id);
-          btn.disabled = true;
-          btn.classList.remove('active');
-          const opt = jumpEl.querySelector(`option[value="${id}"]`);
-          if (opt) opt.disabled = true;
-          badge.className = 'status err';
-          badge.textContent = '不可用';
-        } else {
-          badge.className = 'status ok';
-          badge.textContent = '已同步';
-        }
-        btn.appendChild(badge);
-      });
-      if (unavailable.has(currentId)) {
-        const first = enabled()[0];
-        if (first) loadChannel(first.id);
-      }
+    .then((response) => response.ok ? response.json() : Promise.reject(new Error('状态不可用')))
+    .then((status) => {
+      const updated = new Date(status.updatedAt).toLocaleString('zh-CN', { hour12: false });
+      mirrorStatus.textContent = `镜像同步于 ${updated}`;
     })
     .catch(() => {
-      syncInfo.textContent = '同步状态未知';
+      mirrorStatus.textContent = '镜像状态未知';
     });
 
-  loadChannel(currentId);
+  selectChannel(currentId);
 </script>

@@ -1,4 +1,4 @@
-name: Mirror friend blogs & deploy
+name: Mirror sites, cache RSS & deploy
 
 on:
   push:
@@ -42,7 +42,10 @@ jobs:
             mirror-hotlink-v2-
 
       - name: Mirror and sanitize
-        run: node scripts/mirror.mjs
+        run: npm run mirror
+
+      - name: Fetch and cache RSS
+        run: npm run rss
 
       - name: Build Astro site
         run: npm run build
