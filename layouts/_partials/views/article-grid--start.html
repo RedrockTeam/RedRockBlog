@@ -1,5 +1,5 @@
 {{ $columns := .config.columns | default 2 }}
 {{ $len := .config.len | default 2 }}
-{{/* 横条列表：单列排列，图片居左、内容居右 */}}
-<div class="container px-8 mx-auto xl:px-5 py-5 lg:py-8 {{ if eq $len 1 }}max-w-2xl{{else}}max-w-screen-lg {{end}}">
-  <div class="flex flex-col gap-5">
+{{/* 卡片网格：多篇保持标准宽度两列，单篇用更宽的居中卡 */}}
+<div class="container px-8 mx-auto xl:px-5 py-5 lg:py-8 {{ if eq $len 1 }}max-w-[640px] justify-center{{else}}max-w-screen-lg {{end}}">
+  <div class="grid gap-10 md:grid-cols-{{$columns}} lg:gap-10">

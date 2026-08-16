@@ -1,7 +1,17 @@
 {{ define "main" }}
 
-{{/* 作者列表页：作者卡片网格 */}}
+{{/* 作者列表页：标题 + 简介 + 作者卡片网格 */}}
 <div class="max-w-screen-lg mx-auto px-6 py-12">
+  <header class="text-center mb-12">
+    <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+      {{ .Title }}
+    </h1>
+    {{ with .Content }}
+      <p class="mt-4 text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+        {{ . | plainify | htmlUnescape }}
+      </p>
+    {{ end }}
+  </header>
 
   {{ $terms := .Data.Terms.ByCount }}
   {{ if not $terms }}
