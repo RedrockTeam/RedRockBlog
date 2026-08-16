@@ -105,7 +105,8 @@ def main():
 
     for rel in changed:
         path = ROOT / rel
-        if not path.is_file() or BLOG_DIR not in path.parents:
+        # _index.md 是分区页而非文章，跳过校验
+        if not path.is_file() or BLOG_DIR not in path.parents or path.name.startswith("_index."):
             continue
 
         front_matter = parse_front_matter(path.read_text(encoding="utf-8"))
