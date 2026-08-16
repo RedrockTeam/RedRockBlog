@@ -21,12 +21,13 @@ sections:
         - name: Rycarl's little blog
           url: https://blog.rycarl.cn
           image: https://blog.rycarl.cn/upload/EcoPaste_zLyAZdKQq89-m_far7hZU.png
-        - name: MeT-Blog
-          url: https://blog.met6.top:444
-          image: https://blog.met6.top:444/upload/favicon.ico
         - name: Snowykami's Blog
           url: https://blog.sfkm.me
           image: https://cdn.liteyuki.org/snowykami/avatar_alpha.png
         - name: 萑澈的寒舍
           url: https://hs.cnies.org
           image: https://gastigado.cnies.org/d/elements/hxcn_transparent_240.png
+        - name: MeTの主页
+          url: https://met6.top/
+          description: Stay Hungry. Stay Foolish. 求知若渴，大智若愚。
+          image: https://met6.top/res/logo.png
