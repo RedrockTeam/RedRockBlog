@@ -58,15 +58,6 @@
         <div class="text-lg font-semibold text-neutral-700 dark:text-neutral-200">{{ . | markdownify | emojify }}</div>
       {{ end }}
 
-      {{ with $profile.affiliations }}
-        <div class="text-neutral-600 dark:text-neutral-300">
-          {{ range $index, $org := . }}
-            {{ if gt $index 0 }} · {{ end }}
-            {{ if $org.url }}<a href="{{ $org.url }}" class="underline">{{ $org.name }}</a>{{ else }}{{ $org.name }}{{ end }}
-          {{ end }}
-        </div>
-      {{ end }}
-
       {{ with $profile.bio }}
         <div class="prose prose-slate dark:prose-invert max-w-none">
           {{ . | markdownify | emojify }}
