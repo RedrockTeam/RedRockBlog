@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 # 防止多个 PR 合并后并发推送互相冲突
 concurrency:
