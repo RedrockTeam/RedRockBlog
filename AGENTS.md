@@ -34,6 +34,45 @@
 
 不要直接修改 `themes/` 下的主题文件。需要定制时在 `layouts/` 或 `assets/` 里覆盖同名文件。
 
+## 页面区块
+
+页面由 HugoBlox 预设区块（blox）拼装，配置在 `data/pages/*.yaml` 的 `sections` 里。新增页面区块时**先从下面的预设列表里选**，不要自己写模板；没有合适预设时，再在 `layouts/` 或 `assets/` 里自定义。
+
+预设区块（`themes/hugo-blox-builder/modules/blox/blox/`）：
+
+| block | 用途 |
+| --- | --- |
+| `hero` | 首屏大标题 + 双 CTA 按钮 |
+| `dev-hero` | 开发者风格首屏：渐变背景、社交链接、头像、CTA |
+| `search-hero` | 带搜索框的知识库首屏 |
+| `features` | 图标 + 描述的特色网格 |
+| `comparison-table` | 方案/竞品对比表 |
+| `logos` | 伙伴/友链 logo 墙（grid / 轮播 / 跑马灯） |
+| `stats` | 带动画的数字统计 |
+| `testimonials` | 用户评价引语卡片 |
+| `team-showcase` | 团队成员展示 |
+| `focus-areas` | 重点领域/服务卡片（卡片、六边形、时间线） |
+| `cta-card` | 高对比 CTA 卡片 |
+| `cta-button-list` | 竖排链接按钮列表（link-in-bio） |
+| `cta-image-paragraph` | 图文交替 + 要点 + CTA |
+| `content-collection` | 按文件夹聚合文章/日志等内容的集合区块 |
+| `portfolio` | 可筛选的项目卡片 |
+| `gallery` | 图片画廊（网格/瀑布流 + 灯箱） |
+| `faq` | 常见问题手风琴 |
+| `help-categories` | 帮助中心分类卡片 |
+| `help-questions` | 热门/精选问题列表 |
+| `pricing` | 价格档位 + 月/年切换 |
+| `steps` | 步骤流程（垂直/水平/时间线） |
+| `markdown` | 自由 Markdown 长文 |
+| `map` | 开源交互地图 + 地址卡片 |
+| `contact-info` | 联系信息卡片（地址/电话/邮箱/社交链接） |
+| `resume-biography` / `resume-biography-3` | 个人简介（含头像、社交链接） |
+| `resume-experience` | 工作/教育经历时间线 |
+| `resume-skills` | 技能进度条 |
+| `resume-languages` | 语言熟练度环形图 |
+| `resume-awards` | 奖项/证书卡片 |
+| `tech-stack` | 技术栈图标分组 |
+
 ## CI/CD 规则
 
 - `.github/workflows/hugo.yml`：push 到 `main` 后构建并部署 GitHub Pages；构建前临时生成文章引用的作者档案，确保部署包含作者页。
