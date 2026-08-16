@@ -3,7 +3,8 @@ hugoblox:
     pack: cupcake
     mode: dark
   header:
-    theme_picker: true
+    theme_picker: false
+    theme_toggle: false
     sticky: true
   locale:
     date_format: "2006年1月2日"

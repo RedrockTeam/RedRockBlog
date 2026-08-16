@@ -78,7 +78,9 @@
             {{ if $external }}<span class="text-xs text-neutral-400" aria-hidden="true">↗</span>{{ end }}
           </div>
           {{ with $description }}
-          <div class="mt-1 line-clamp-2 text-sm text-neutral-600 dark:text-neutral-400">{{ . }}</div>
+          <div class="fl-desc mt-1 overflow-hidden whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-400">
+            <span class="fl-desc-inner inline-block">{{ . }}</span>
+          </div>
           {{ end }}
           {{ with $url_host }}
           <div class="mt-1 truncate text-xs text-neutral-400 dark:text-neutral-500">{{ . }}</div>
@@ -90,3 +92,38 @@
     </div>
   </div>
 </div>
+
+<style>
+@keyframes fl-marquee {
+  to { transform: translateX(-50%); }
+}
+.fl-scroll .fl-desc-track {
+  display: inline-block;
+  animation: fl-marquee 8s linear infinite;
+}
+.fl-desc-item {
+  display: inline-block;
+  padding-right: 2rem;
+}
+</style>
+<script>
+(function () {
+  var descs = document.querySelectorAll('.fl-desc');
+  for (var i = 0; i < descs.length; i++) {
+    var wrap = descs[i];
+    var inner = wrap.querySelector('.fl-desc-inner');
+    if (!inner || inner.scrollWidth <= wrap.clientWidth) continue;
+    var dup = document.createElement('span');
+    dup.className = 'fl-desc-item';
+    dup.textContent = inner.textContent;
+    dup.setAttribute('aria-hidden', 'true');
+    var track = document.createElement('span');
+    track.className = 'fl-desc-track';
+    inner.className = 'fl-desc-item';
+    track.appendChild(inner);
+    track.appendChild(dup);
+    wrap.appendChild(track);
+    wrap.classList.add('fl-scroll');
+  }
+})();
+</script>
