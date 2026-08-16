@@ -1,10 +1,10 @@
-title: RedRockBlog
+title: 红岩博客
 type: landing
 
 sections:
   - block: hero
     content:
-      title: "RedRockBlog"
+      title: "红岩博客"
       text: |
         RedRock 团队的技术博客。多作者、组件化、纯 Markdown 写作。
       primary_action:

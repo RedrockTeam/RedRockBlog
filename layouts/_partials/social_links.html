@@ -1,0 +1,27 @@
+{{ if .Params.profiles }}
+<div class="flex flex-wrap text-neutral-500 dark:text-neutral-300">
+  {{ range $links := .Params.profiles }}
+    {{ $link := .url }}
+    {{ $scheme := (urls.Parse $link).Scheme }}
+    {{ $target := "" }}
+    {{ if not $scheme }}
+      {{ $link = .url | relLangURL }}
+    {{ else if in (slice "http" "https") $scheme }}
+      {{ $target = "target=\"_blank\" rel=\"noopener\" rel=\"me noopener noreferrer\"" }}
+    {{ end }}
+    <a
+      class="pr-4 transition-transform hover:scale-125 hover:text-primary-700 dark:hover:text-primary-400"
+      style="will-change:transform;"
+      href="{{ $link | safeURL }}"
+      {{ $target | safeHTMLAttr }}
+      aria-label="{{ if hasPrefix .icon "http" }}{{ $link }}{{ else }}{{ .icon | title }}{{ end }}"
+    >
+      {{ if hasPrefix .icon "http" }}
+        <img src="{{ .icon | safeURL }}" alt="" loading="lazy" class="inline-block" style="height:1em; width:auto;" />
+      {{ else }}
+        {{ partial "functions/get_icon" (dict "name" .icon "attributes" "style=\"height: 1em;\"") }}
+      {{ end }}
+    </a>
+  {{ end }}
+</div>
+{{ end }}

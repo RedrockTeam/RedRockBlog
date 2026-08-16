@@ -1,0 +1,5 @@
+hugoblox:
+  header:
+    theme_picker: true
+  locale:
+    date_format: "2006年1月2日"
