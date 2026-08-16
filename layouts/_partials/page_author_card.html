@@ -12,7 +12,7 @@
 
   {{ $avatar := $profile.avatar }}
 
-<div class="flex pt-12 pb-4">
+<div class="group relative flex pt-12 pb-4">
   {{ if $avatar }}
     {{ if not (reflect.IsImageResourceProcessable $avatar) }}
     <img
@@ -47,11 +47,9 @@
     <div class="text-[0.6rem] uppercase leading-3 text-neutral-500 dark:text-neutral-400">
       作者
     </div>
-    <div class="font-semibold leading-6 text-neutral-800 dark:text-neutral-300">
+    <div class="font-semibold leading-6 text-neutral-800 transition-colors group-hover:text-primary-600 dark:text-neutral-300 dark:group-hover:text-primary-400">
       <span class="inline-block">
-        {{if $profile_url}}<a href="{{$profile_url}}" class="no-underline">{{end}}
         {{$profile.title}}
-        {{if $profile_url}}</a>{{end}}
       </span>
       {{- with $profile.pronouns -}}
         <span class="text-sm font-normal text-gray-600 dark:text-gray-400 ml-1 inline-block">({{ . }})</span>
@@ -69,10 +67,14 @@
     <div class="text-sm text-neutral-700 dark:text-neutral-300">{{ . | markdownify | emojify }}</div>
     {{ end }}
 
-    <div class="text-2xl sm:text-lg pt-1">
+    <div class="relative z-10 text-2xl sm:text-lg pt-1">
       {{ partial "social_links" (dict "Params" (dict "profiles" $profile.links)) }}
     </div>
   </div>
+
+  {{ if $profile_url }}
+  <a href="{{ $profile_url }}" class="absolute inset-0 z-0 rounded-xl" aria-label="{{ $profile.title }}"></a>
+  {{ end }}
 </div>
 
 {{end}}{{/* End Check for Author Profile */}}
