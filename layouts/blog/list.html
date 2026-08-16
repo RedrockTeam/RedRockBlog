@@ -1,13 +1,23 @@
 {{ define "main" }}
 
-{{/* 博客列表页：文章网格 */}}
+{{/* 博客列表页：居中页头 + 文章网格 */}}
+<div class="max-w-screen-lg mx-auto px-6 pt-12 pb-6 text-center">
+  <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+    {{ .Title }}
+  </h1>
+  {{ with .Content }}
+    <div class="prose prose-slate dark:prose-invert mx-auto mt-4 max-w-2xl text-left">
+      {{ . }}
+    </div>
+  {{ end }}
+</div>
 
 {{ $view := .Params.view | default "card" }}
 {{ $block := . }}
 
 {{ $paginator := .Paginate .Pages.ByDate.Reverse }}
 {{ $config := dict
-  "columns" (.Params.columns | default 3)
+  "columns" (.Params.columns | default 2)
   "len" (len $paginator.Pages)
   "fill_image" (.Params.fill_image | default true)
   "show_date" (.Params.show_date | default true)

@@ -86,7 +86,7 @@
 {{ $block := . }}
 {{ $paginator := .Paginate .Pages.ByDate.Reverse }}
 {{ $config := dict
-  "columns" 3
+  "columns" 2
   "len" (len $paginator.Pages)
   "fill_image" true
   "show_date" true

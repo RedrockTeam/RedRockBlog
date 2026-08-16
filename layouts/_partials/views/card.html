@@ -21,22 +21,15 @@
 {{ if $isEvent }}
 {{ $event_dates = partial "functions/get_event_dates" $item }}
 {{ end }}
-{{/* 无配图时的占位站标随机色：由文章唯一 ID 派生，同一篇文章颜色稳定，不同文章随机分布 */}}
-{{/* 调色板只保留好看的色相：红、橙、黄、绿、青、蓝、靛、紫、品红 */}}
-{{ $palette := slice 0 25 50 120 170 200 235 270 310 }}
-{{ $placeholder_hue := index $palette (mod (int (hash.FNV32a (or $item.File.UniqueID $item.RelPermalink))) (len $palette)) }}
 
-<a href="{{ $link }}" {{ $target | safeHTMLAttr }} class="group bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm rounded-2xl ring-1 ring-zinc-900/5 dark:ring-white/10 shadow-lg overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-primary-500/50 flex flex-col sm:flex-row" aria-labelledby="card-title-{{ $item.File.UniqueID }}">
+<div class="group bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm rounded-2xl ring-1 ring-zinc-900/5 dark:ring-white/10 shadow-lg overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-2 focus-within:ring-2 focus-within:ring-primary-500/50" role="article" aria-labelledby="card-title-{{ $item.File.UniqueID }}">
     <!-- Image Section -->
-    <div class="relative overflow-hidden aspect-[16/9] sm:aspect-auto sm:w-2/5 sm:shrink-0 bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
+    <div class="relative overflow-hidden aspect-[16/9] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
       {{/* Award badge takes priority over trending — awards are higher-signal */}}
       {{ $top_award := "" }}
       {{ with $item.Params.awards }}{{ $top_award = index . 0 }}{{ end }}
       {{ with $top_award }}
-        {{/* 整卡已是链接，徽章去掉自身链接避免嵌套 <a> */}}
-        {{ $award := . }}
-        {{ if reflect.IsMap $award }}{{ $award = dict "name" $award.name "level" $award.level "note" $award.note "issuer" $award.issuer "date" $award.date }}{{ end }}
-        {{ partial "components/award_badge.html" (dict "award" $award "page" $item "variant" "card-corner") }}
+        {{ partial "components/award_badge.html" (dict "award" . "page" $item "variant" "card-corner") }}
       {{ else }}
         {{ with $item.Params.content_meta }}
           {{ if .trending }}
@@ -55,15 +48,15 @@
         */}}
         {{ $canProcess := and (reflect.IsImageResourceProcessable .) (ne .MediaType.SubType "gif") }}
         {{ if not $canProcess }}
-          <span class="block">
-            <img class="w-full h-full transition-transform duration-500 ease-out group-hover:scale-105 object-cover"
+          <a href="{{ $link }}" {{ $target | safeHTMLAttr }} class="block">
+            <img class="w-full h-full transition-transform duration-500 ease-out group-hover:scale-105 {{ if $fill_image }}object-fill{{ else }}object-contain{{ end }}"
                  src="{{ .RelPermalink }}"
                  loading="lazy"
                  decoding="async"
                  {{ if eq $index 0 }}fetchpriority="high"{{ end }}
                  style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
                  alt="{{ $item.Title | plainify }} featured image">
-          </span>
+          </a>
         {{ else }}
           {{ $original_image := "" }}
           {{ if $fill_image }}
@@ -77,10 +70,10 @@
               "sizes" (slice 400 600 800)
               "formats" (slice "avif" "webp" "jpg")
           ) }}
-          <span class="block">
-            <img class="w-full h-full transition-transform duration-500 ease-out group-hover:scale-105 object-cover" 
+          <a href="{{ $link }}" {{ $target | safeHTMLAttr }} class="block">
+            <img class="w-full h-full transition-transform duration-500 ease-out group-hover:scale-105 {{ if $fill_image }}object-fill{{ else }}object-contain{{ end }}" 
                  srcset="{{ $responsive.srcset }}"
-                 sizes="(max-width: 768px) 100vw, 40vw"
+                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                  src="{{ $responsive.fallback.RelPermalink }}" 
                  width="{{ $original_image.Width }}" 
                  height="{{ $original_image.Height }}"
@@ -89,24 +82,19 @@
                  {{ if eq $index 0 }}fetchpriority="high"{{ end }}
                  style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
                  alt="{{ $item.Title | plainify }} featured image">
-          </span>
+          </a>
         {{ end }}
       {{ else }}
-        <!-- 占位图：随机配色的站标（颜色由文章 ID 派生） -->
-        <span class="block w-full h-full">
-          <div class="w-full h-full flex items-center justify-center">
-            {{ with resources.Get "media/icon.png" }}
-            <img
-              class="h-16 w-auto opacity-90 transition-transform duration-300 group-hover:scale-110 dark:opacity-80"
-              src="{{ .RelPermalink }}"
-              alt="{{ $item.Title | plainify }} 占位图"
-              loading="lazy"
-              decoding="async"
-              style="filter: hue-rotate({{ $placeholder_hue }}deg);"
-            />
-            {{ end }}
+        <!-- Fallback gradient using theme colors - make clickable for consistency -->
+        <a href="{{ $link }}" {{ $target | safeHTMLAttr }} class="block w-full h-full">
+          <div class="w-full h-full bg-gradient-to-br from-primary-600/40 via-secondary-600/30 to-primary-800/50 flex items-center justify-center transition-all duration-300 group-hover:from-primary-500/50 group-hover:via-secondary-500/40 group-hover:to-primary-700/60">
+            <div class="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <svg class="w-8 h-8 text-white/40" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
+              </svg>
+            </div>
           </div>
-        </span>
+        </a>
       {{end}}
       
       <!-- Subtle overlay for better text contrast (allow clicks to pass through) -->
@@ -114,17 +102,17 @@
     </div>
 
     <!-- Content Section -->
-    <div class="p-6 space-y-3 flex-1 min-w-0">
+    <div class="p-8 space-y-4">
       {{ with $item.Params.content_meta }}
         {{ if or .content_type .difficulty }}
         <div class="flex items-center gap-x-4">
           {{ with .content_type }}
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-300">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-300">
             {{ . }}
           </span>
           {{ end }}
           {{ with .difficulty }}
-          <span class="text-xs font-medium text-zinc-600 dark:text-zinc-400">{{ i18n "difficulty" }}: {{ . }}</span>
+          <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">{{ i18n "difficulty" }}: {{ . }}</span>
           {{ end }}
         </div>
         {{ end }}
@@ -133,24 +121,26 @@
       {{ if and $item.Params.tags (gt (len $item.Params.tags) 0) }}
       <div class="flex items-center gap-2">
         {{ with index ($item.GetTerms "tags") 0 }}
-        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-300">
-          {{ .Page.LinkTitle }}
-        </span>
+        <a href="{{ .RelPermalink }}">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-300">
+            {{ .Page.LinkTitle }}
+          </span>
+        </a>
         {{ end }}
       </div>
       {{ end }}
 
-      <h3 id="card-title-{{ $item.File.UniqueID }}" class="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200 leading-tight">
-        <span class="group-hover:underline">
+      <h3 id="card-title-{{ $item.File.UniqueID }}" class="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200 leading-tight">
+        <a href="{{ $link }}" {{ $target | safeHTMLAttr }} class="hover:underline">
           {{ $item.Title }}
           {{ if $item.Params.external_link }}
             {{ partial "functions/get_icon" (dict "name" "arrow-top-right-on-square" "attributes" "style=\"height: 1em;\" class=\"inline-flex h-4 w-4 ml-1 align-text-top\"") }}
           {{ end }}
-        </span>
+        </a>
       </h3>
       
-      <p class="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed line-clamp-3">
-        {{ (partial "functions/get_summary" $item) | plainify | htmlUnescape | truncate 140 }}
+      <p class="text-zinc-600 dark:text-zinc-400 text-base leading-relaxed line-clamp-3">
+        {{ (partial "functions/get_summary" $item) | plainify | htmlUnescape | truncate 180 }}
       </p>
 
       {{ with $item.Params.content_meta.prerequisites }}
@@ -173,20 +163,31 @@
         <div class="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-500 flex-wrap mb-3">
           {{ if $item.Params.authors }}
           <div class="flex items-center gap-2 min-w-0">
-            {{ $slug := index $item.Params.authors 0 | urlize }}
-            {{ $profile := partial "functions/get_author_profile" $slug }}
-            {{ $avatar := $profile.avatar }}
-            <div class="relative h-5 w-5 flex-shrink-0">
-              {{ if $avatar }}
-                {{ $avatar_48 := $avatar.Process "Fill 48x48 Center webp" }}
-                <img alt="avatar" class="rounded-full object-cover" src="{{$avatar_48.RelPermalink}}" width="20" height="20" loading="lazy" decoding="async" />
-              {{ else }}
-                <div class="w-5 h-5 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                  {{ partial "functions/get_icon" (dict "name" "hero/user" "attributes" "class=\"w-3 h-3 text-gray-500 dark:text-gray-400\"") }}
-                </div>
+            {{ $orderedAuthors := partial "functions/order-authors.html" (dict "page" $item) }}
+            {{ $shown := 2 }}
+            {{ range $index, $raw := $orderedAuthors }}
+              {{ if ge $index $shown }}{{ break }}{{ end }}
+              {{ $slug := $raw | urlize }}
+              {{ $profile := partial "functions/get_author_profile" (dict "slug" $slug "title" $raw) }}
+              {{ $avatar := $profile.avatar }}
+              {{ if gt $index 0 }}
+                <span class="opacity-40">,</span>
               {{ end }}
-            </div>
-            <span class="truncate max-w-[9rem] text-xs">{{ $profile.title }}</span>
+              <div class="relative h-6 w-6 flex-shrink-0">
+                {{ if $avatar }}
+                  {{ $avatar_48 := $avatar.Process "Fill 48x48 Center webp" }}
+                  <img alt="avatar" class="rounded-full object-cover" src="{{$avatar_48.RelPermalink}}" width="24" height="24" loading="lazy" decoding="async" />
+                {{ else }}
+                  <div class="w-6 h-6 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                    {{ partial "functions/get_icon" (dict "name" "hero/user" "attributes" "class=\"w-4 h-4 text-gray-500 dark:text-gray-400\"") }}
+                  </div>
+                {{ end }}
+              </div>
+              <span class="truncate max-w-[9rem] text-sm">{{ $profile.title }}</span>
+            {{ end }}
+            {{ if gt (len $orderedAuthors) $shown }}
+              <span class="opacity-40 text-sm">+{{ sub (len $orderedAuthors) $shown }}</span>
+            {{ end }}
           </div>
           <span class="opacity-40">•</span>
           {{ end }}
@@ -214,12 +215,12 @@
         <!-- Read More with arrow - properly separated -->
         {{ if $showReadMore }}
         <div class="pt-2 border-t border-zinc-200/50 dark:border-zinc-700/50">
-          <span class="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300 font-medium text-sm transition-all duration-300">
+          <a href="{{ $link }}" {{ $target | safeHTMLAttr }} class="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium text-sm transition-all duration-300 group/link">
             <span>{{ i18n "read_more" | default "Read more" }}</span>
-            <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg class="w-4 h-4 transition-transform group-hover/link:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
             </svg>
-          </span>
+          </a>
         </div>
         {{ end }}
       </div>
@@ -236,4 +237,4 @@
         </div>
       {{ end }}
     </div>
-</a>
+</div>
