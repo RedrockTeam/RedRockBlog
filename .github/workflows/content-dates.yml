@@ -38,13 +38,27 @@ jobs:
       - name: Fill dates from first commit
         run: python .github/scripts/generate_commit_dates.py
 
+      # 分支保护启用后 GITHUB_TOKEN 无法直接推 main，改用 GitHub App token（App 已加入绕过名单）
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: RedrockTeam
+          repositories: RedRockBlog
+
+      # App token 推送会触发工作流，提交消息带 [skip ci] 防止递归
       - name: Commit dates to main
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           git add content/blog content/log
           if ! git diff --cached --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit -m "chore: 自动写入文章首次提交时间"
+            git commit -m "chore: 自动写入文章首次提交时间[skip ci]"
+            git remote set-url origin "https://x-access-token:${APP_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
             # 多个回写工作流并行时可能撞车，失败自动变基重试
             ok=0
             for attempt in 1 2 3 4 5; do
