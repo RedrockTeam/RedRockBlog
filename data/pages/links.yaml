@@ -1,0 +1,32 @@
+---
+title: 名人堂
+type: landing
+
+sections:
+  - block: friend-links
+    content:
+      # 每条友链格式：
+      # - name: 站点名
+      #   url: https://站点地址
+      #   description: 一句话介绍
+      #   image: https://站点/头像.png   # 可选；不填自动用站点 /favicon.ico，加载失败再落回首字
+      links:
+        - name: Losita's Blog
+          url: https://blog.lecspace.com
+          image: https://dl2.lecspace.com/touxiang.webp
+        - name: 补络阁
+          url: https://blog.tuf3i.cc
+          description: 咕咕嘎嘎，咕咕嘎嘎...
+          image: https://oss.tuf3i.cc/blog/profile/avatar.png
+        - name: Rycarl's little blog
+          url: https://blog.rycarl.cn
+          image: https://blog.rycarl.cn/upload/EcoPaste_zLyAZdKQq89-m_far7hZU.png
+        - name: MeT-Blog
+          url: https://blog.met6.top:444
+          image: https://blog.met6.top:444/upload/favicon.ico
+        - name: Snowykami's Blog
+          url: https://blog.sfkm.me
+          image: https://cdn.liteyuki.org/snowykami/avatar_alpha.png
+        - name: 萑澈的寒舍
+          url: https://hs.cnies.org
+          image: https://gastigado.cnies.org/d/elements/hxcn_transparent_240.png
