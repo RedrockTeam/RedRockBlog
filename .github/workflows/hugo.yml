@@ -101,7 +101,7 @@ jobs:
 
       - name: Build
         run: |
-          hugo build --gc --minify --baseURL "${{ steps.pages.outputs.base_url }}/"
+          hugo build --gc --minify --baseURL "https://blog.redrock.team/"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
