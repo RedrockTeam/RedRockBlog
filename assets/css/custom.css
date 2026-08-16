@@ -1,0 +1,5 @@
+/* 去掉 Tailwind Typography 在行内代码前后渲染的装饰反引号 */
+.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::before,
+.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::after {
+  content: none;
+}
