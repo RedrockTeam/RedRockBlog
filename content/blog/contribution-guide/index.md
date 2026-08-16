@@ -1,5 +1,6 @@
 ---
 title: "贡献博客指引"
+date: 2026-08-16T18:13:13+08:00
 summary: "给红岩博客投稿：在 content/blog/ 下新建一篇 Markdown 文章，填好必填字段，提一个 Pull Request，合并后自动部署上线。"
 tags:
   - 指南
