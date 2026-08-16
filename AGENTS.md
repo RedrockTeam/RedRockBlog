@@ -86,5 +86,6 @@
 
 - 默认分支 `main`；新功能在 `feat/*` 分支开发，通过 PR 合入。
 - 提交信息用中文，建议前缀 `feat:` / `fix:` / `chore:` 等。
+- PR 标题用中文，不要带 `feat:` / `fix:` / `chore:` 等提交前缀，直接描述改动即可。
 - Python 脚本放在 `.github/scripts/`，使用 PyYAML，中文输出，GitHub API 用 `GH_TOKEN`。
 - 新增 CI 工作流后检查：YAML 可解析、权限最小化、并发安全、无递归触发风险。
