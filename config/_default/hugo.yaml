@@ -1,6 +1,11 @@
 baseURL: https://example.org/
 title: RedRockBlog
 
+defaultContentLanguage: zh
+languageCode: zh-CN
+
+timeZone: Asia/Shanghai
+
 build:
   buildStats:
     enable: true
