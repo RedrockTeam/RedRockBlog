@@ -1,27 +1,19 @@
 {{ define "main" }}
 
-{{/* 博客列表页：文章网格 */}}
+{{/* 日志列表页：日期 + 标题 + 摘要 */}}
 
-{{ $view := .Params.view | default "card" }}
+{{ $view := .Params.view | default "date-title-summary" }}
 {{ $block := . }}
 
 {{ $paginator := .Paginate .Pages.ByDate.Reverse }}
 {{ $config := dict
-  "columns" (.Params.columns | default 3)
+  "columns" (.Params.columns | default 1)
   "len" (len $paginator.Pages)
   "fill_image" (.Params.fill_image | default true)
   "show_date" (.Params.show_date | default true)
   "show_read_time" (.Params.show_read_time | default true)
   "show_read_more" (.Params.show_read_more | default true)
 }}
-
-{{/* Check if any pages have author_notes to enable Alpine.js */}}
-{{ range .Pages }}
-  {{ if isset .Params "author_notes" }}
-    {{ $.Store.Set "has_alpine" true }}
-    {{ break }}
-  {{ end }}
-{{ end }}
 
 <div class="flex flex-col items-center pb-12">
 
