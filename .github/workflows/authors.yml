@@ -1,0 +1,61 @@
+name: Sync Authors from Blog Posts
+
+on:
+  pull_request:
+    paths:
+      - 'content/blog/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'content/blog/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-authors:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Collect changed blog files
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+            git diff --name-only "$BASE"...HEAD -- content/blog > /tmp/changed.txt || true
+          else
+            git diff --name-only HEAD~1...HEAD -- content/blog > /tmp/changed.txt || true
+          fi
+          echo "changed files: $(wc -l < /tmp/changed.txt)"
+
+      - name: Ensure author profiles
+        run: python .github/scripts/ensure_authors.py /tmp/changed.txt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit generated profiles
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/authors assets/media/authors
+          if git diff --cached --quiet; then
+            echo "无新档案，无需提交"
+          else
+            git commit -m "chore: 自动生成作者档案"
+            git push || echo "推送失败：fork PR 无法自动推送，请手动添加生成的档案"
+          fi

@@ -1,0 +1,7 @@
+main:
+  - name: Blog
+    url: /blog
+    weight: 10
+  - name: Authors
+    url: /authors
+    weight: 20

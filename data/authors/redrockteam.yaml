@@ -1,0 +1,7 @@
+name:
+  display: RedRock Team
+role: 团队
+bio: RedRock 团队，共同维护 RedRockBlog，分享技术实践与团队动态。
+links:
+  - icon: brands/github
+    url: https://github.com/RedRockTeam
