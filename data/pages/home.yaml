@@ -2,16 +2,11 @@ title: 红岩博客
 type: landing
 
 sections:
-  - block: globe-hero
+  - block: hero
     content:
       title: "红岩博客"
       text: |
         RedRock 团队的技术博客
-    design:
-      css_class: "hero-image-bg"
-      background:
-        image:
-          filename: background.png
 
   - block: collection
     content:
