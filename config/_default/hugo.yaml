@@ -4,6 +4,8 @@ title: 红岩博客
 defaultContentLanguage: zh
 languageCode: zh-CN
 
+enableGitInfo: true
+
 timeZone: Asia/Shanghai
 
 build:
@@ -35,6 +37,7 @@ security:
   exec:
     allow:
       - ^dart-sass-embedded$
+      - ^git$
       - ^go$
       - ^node$
       - ^npx$
