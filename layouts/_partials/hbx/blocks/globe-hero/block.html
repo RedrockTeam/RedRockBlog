@@ -1,0 +1,91 @@
+{{/* Globe Hero Block - 移植自 redrock.team 首页的地球首屏样式 */}}
+{{ $page := .wcPage }}
+{{ $block := .wcBlock }}
+{{ $content := $block.content }}
+{{ if not (reflect.IsMap $content) }}{{ $content = dict }}{{ end }}
+
+{{ $title := index $content "title" | default "" }}
+{{ $text := index $content "text" | default "" }}
+{{ $ctas := index $content "ctas" | default slice }}
+{{ $orbit_text := index $content "orbit_text" | default " WE ARE REDROCKERS. " }}
+
+<div class="relative">
+  {{/* 地球舞台 */}}
+  <div class="rr-stage absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
+    <div class="rr-ball">
+      <div class="rr-line rr-line1"></div>
+      <div class="rr-line rr-line2"></div>
+      <div class="rr-line rr-line3"></div>
+      <span class="rr-pstar" style="top:24.3%;left:27.8%;width:.37vw;height:.37vw"></span>
+      <span class="rr-pstar" style="top:32%;left:30%;width:.5vw;height:.5vw"></span>
+      <span class="rr-pstar" style="top:34.7%;left:46.5%;width:.5vw;height:.5vw"></span>
+    </div>
+
+    <svg class="rr-orbit-text" width="100%" height="100%" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <path id="rr-orbit-path" d="M250,250 m -290,0 a 290,240 -50 1,1 580,0" fill="transparent"></path>
+      <text fill="rgba(255,255,255,.35)">
+        <textPath href="#rr-orbit-path" font-family="Aldrich" font-size="22">
+          {{ strings.Repeat 5 $orbit_text }}
+          <animate attributeName="startOffset" from="260" to="635" dur="10s" repeatCount="indefinite"></animate>
+        </textPath>
+      </text>
+    </svg>
+
+    {{ $stars := slice (dict "x" 8 "y" 50 "d" "0s") (dict "x" 25 "y" 80 "d" "1s") (dict "x" 40 "y" 3 "d" "0s") (dict "x" 80 "y" 10 "d" "1s") (dict "x" 75 "y" 25 "d" "0s") (dict "x" 95 "y" 50 "d" "1s") (dict "x" 85 "y" 80 "d" "0s") }}
+    {{ range $s := $stars }}
+      <span class="rr-wstar" style="top:{{ $s.y }}%;left:{{ $s.x }}%;animation-delay:{{ $s.d }}"></span>
+    {{ end }}
+  </div>
+
+  {{/* 内容层 */}}
+  <div class="relative z-10 flex min-h-[calc(100vh-var(--navbar-height))] flex-col items-center justify-center px-6 py-24 text-center">
+    {{ with $title }}
+      <h1 class="mb-4 max-w-4xl text-4xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">{{ . | markdownify | emojify }}</h1>
+    {{ end }}
+    {{ with $text }}
+      <p class="max-w-2xl text-lg text-neutral-300 sm:text-xl">{{ . | markdownify | emojify }}</p>
+    {{ end }}
+    {{ with $ctas }}
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+        {{ range . }}
+          {{ $style := index . "style" | default "solid" }}
+          {{ $url := index . "url" | default "#" }}
+          {{ $label := index . "text" | default "" }}
+          {{ if $label }}
+            <a href="{{ $url }}"
+               class="{{ if eq $style "outline" }}rounded-full px-6 py-3 text-sm font-semibold ring-1 ring-inset ring-neutral-600 text-white hover:bg-white/10 transition-colors{{ else }}rounded-full bg-primary-600 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-primary-500 transition-colors{{ end }}">
+              {{ $label }}
+            </a>
+          {{ end }}
+        {{ end }}
+      </div>
+    {{ end }}
+  </div>
+</div>
+
+<style>
+@font-face{font-family:Aldrich;src:url(/fonts/Aldrich.ttf);font-display:swap}
+
+.rr-stage{overflow:hidden}
+.rr-ball{width:40vw;height:40vw;background:url(/media/redrock/centerBall.png) no-repeat center/100% 100%;border-radius:50%;perspective:1200px;transform-style:preserve-3d;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2}
+.rr-line{border-radius:50%;position:absolute;border:2px solid #6b7280;transform-style:preserve-3d;left:50%;top:50%}
+.rr-line1{width:62vw;height:62vw;margin-left:-31vw;margin-top:-31vw;top:48%;transform:rotate(45deg) rotateY(96deg)}
+.rr-line2{width:45vw;height:45vw;margin-left:-22.5vw;margin-top:-22.5vw;border:.5px solid #6b7280!important}
+.rr-line3{width:60vw;height:60vw;margin-left:-30vw;margin-top:-30vw;transform:rotateX(82deg)}
+.rr-line1:before,.rr-line2:before,.rr-line3:before,.rr-line3:after{content:"";width:10px;height:10px;border-radius:50%;position:absolute;top:0;left:0;right:0;bottom:0;margin:auto}
+.rr-line1:before{background:#8b8b8b;animation:rr-move1 20s linear infinite}
+.rr-line2:before{background:#9ca3af;animation:rr-move2 10s linear infinite}
+.rr-line3:before{background:#9ca3af;animation:rr-move3 14s linear infinite}
+.rr-line3:after{width:12px;height:12px;background:#b0b0b0;animation:rr-move4 14s linear infinite}
+
+@keyframes rr-move1{0%{transform:rotate(0) translate(31vw) rotate(0) rotateY(-96deg)}to{transform:rotate(360deg) translate(31vw) rotate(-360deg) rotateY(-96deg)}}
+@keyframes rr-move2{0%{transform:rotate(0) translate(22.5vw) rotate(0)}to{transform:rotate(360deg) translate(22.5vw) rotate(-360deg)}}
+@keyframes rr-move3{0%{transform:rotate(0) translateY(30vw) rotate(0) rotateX(-82deg)}to{transform:rotate(360deg) translateY(30vw) rotate(-360deg) rotateX(-82deg)}}
+@keyframes rr-move4{0%{transform:rotate(60deg) translateY(30vw) rotate(-60deg) rotateX(-82deg)}to{transform:rotate(420deg) translateY(30vw) rotate(-420deg) rotateX(-82deg)}}
+
+.rr-pstar{position:absolute;border-radius:50%;background:#FFBCBC;box-shadow:0 0 6px 3px #b08080;z-index:3}
+.rr-wstar{position:absolute;width:.2vw;height:.2vw;border-radius:50%;background:#fff;box-shadow:0 0 4px 2px rgba(255,255,255,.35);animation:rr-twinkle 3.2s ease-in-out infinite}
+@keyframes rr-twinkle{0%,100%{opacity:.15}50%{opacity:1}}
+
+.rr-orbit-text{position:absolute;inset:0;z-index:1;pointer-events:none;user-select:none}
+</style>

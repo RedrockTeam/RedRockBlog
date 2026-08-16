@@ -2,7 +2,7 @@ title: 红岩博客
 type: landing
 
 sections:
-  - block: hero
+  - block: globe-hero
     content:
       title: "红岩博客"
       text: |
