@@ -6,7 +6,7 @@ sections:
     content:
       title: "红岩博客"
       text: |
-        RedRock 团队的技术博客。
+        RedRock 团队的技术博客
       primary_action:
         text: "查看博客"
         url: "/blog"
