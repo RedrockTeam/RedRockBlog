@@ -1,0 +1,77 @@
+name: Generate Log Entries from PRs
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# 防止多个 PR 合并后并发推送互相冲突
+concurrency:
+  group: log-sync
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  generate-log:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Collect new commits
+        run: |
+          BEFORE="${{ github.event.before }}"
+          if [[ -z "$BEFORE" || "$BEFORE" =~ ^0+$ ]]; then
+            # workflow_dispatch 或仓库首次推送：回看最近若干提交
+            BEFORE="$(git rev-parse HEAD~10 2>/dev/null || git rev-list --max-parents=0 HEAD | tail -1)"
+          fi
+          git rev-list "$BEFORE"..HEAD > /tmp/new_commits.txt || true
+          echo "new commits: $(wc -l < /tmp/new_commits.txt)"
+
+      - name: Generate log entries
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python .github/scripts/generate_log.py /tmp/new_commits.txt
+
+      # 只有合并进 main 之后才生成日志并推回 main；GITHUB_TOKEN 的推送不会再次触发本工作流
+      - name: Commit generated logs to main
+        id: commit-logs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ! git diff --quiet -- content/log; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add content/log
+            git commit -m "chore: 自动生成日志条目（PR 标签 log）"
+            git pull --rebase origin main   # 合并期间 main 有变化就先变基，避免非快进失败
+            git push origin HEAD:main
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "无新日志条目，无需提交"
+          fi
+
+      # 日志提交本身不会触发新的 workflow run，这里手动调度部署，让日志立即上线
+      - name: Trigger deploy
+        if: steps.commit-logs.outputs.deploy == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run hugo.yml --ref main
