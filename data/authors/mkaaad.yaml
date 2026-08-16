@@ -1,8 +1,0 @@
-name:
-  display: mkaaad
-role: 维护者
-bio: RedRockBlog 维护者，负责站点架构和 Hugo 主题选型。
-superuser: true
-links:
-  - icon: brands/github
-    url: https://github.com/mkaaad
