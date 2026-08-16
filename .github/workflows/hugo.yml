@@ -27,7 +27,6 @@ jobs:
       GO_VERSION: '1.26'
       NODE_VERSION: 22
       TZ: Asia/Shanghai
-      HUGO_CACHEDIR: ${{ runner.temp }}/hugo_cache
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -100,6 +99,8 @@ jobs:
         run: python .github/scripts/generate_commit_dates.py
 
       - name: Build
+        env:
+          HUGO_CACHEDIR: ${{ runner.temp }}/hugo_cache
         run: |
           hugo build --gc --minify --baseURL "https://blog.redrock.team/"
 
