@@ -48,3 +48,13 @@ sections:
     design:
       view: article-grid
       columns: 2
+
+  - block: collection
+    content:
+      title: "最近日志"
+      count: 5
+      filters:
+        folders:
+          - log
+    design:
+      view: date-title-summary

@@ -1,4 +1,6 @@
 hugoblox:
+  theme:
+    pack: cupcake
   header:
     theme_picker: true
   locale:

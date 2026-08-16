@@ -5,3 +5,6 @@ main:
   - name: 作者
     url: /authors
     weight: 20
+  - name: 日志
+    url: /log
+    weight: 30
