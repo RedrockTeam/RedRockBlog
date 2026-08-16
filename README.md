@@ -22,7 +22,7 @@ hugo server
 
 ## 如何投稿
 
-见《[贡献博客指引](/blog/contribution-guide/)》：在 `content/blog/<英文短名>/index.md` 写文章，front matter 必填 `title` / `summary` / `authors`（`date` 可选，CI 自动按首次提交时间写入），发起 Pull Request，CI 校验通过后合并，站点自动重新部署。
+见《[贡献博客指引](content/blog/contribution-guide/index.md)》：在 `content/blog/<英文短名>/index.md` 写文章，front matter 必填 `title` / `summary` / `authors`（`date` 可选，CI 自动按首次提交时间写入），发起 Pull Request，CI 校验通过后合并，站点自动重新部署。
 
 ## 日志栏（修复日志 / 公告）
 
