@@ -45,8 +45,20 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git commit -m "chore: 自动写入文章首次提交时间"
-            git pull --rebase origin main
-            git push origin HEAD:main
+            # 多个回写工作流并行时可能撞车，失败自动变基重试
+            ok=0
+            for attempt in 1 2 3 4 5; do
+              if git pull --rebase origin main && git push origin HEAD:main; then
+                ok=1
+                break
+              fi
+              echo "第 ${attempt} 次推送失败，2 秒后重试..."
+              sleep 2
+            done
+            if [ "$ok" != "1" ]; then
+              echo "连续 5 次推送失败，退出"
+              exit 1
+            fi
           else
             echo "日期已一致，无需提交"
           fi
