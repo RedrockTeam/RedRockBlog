@@ -52,18 +52,30 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: python .github/scripts/generate_log.py /tmp/new_commits.txt
 
-      # 只有合并进 main 之后才生成日志并推回 main；GITHUB_TOKEN 的推送不会再次触发本工作流
+      # 分支保护启用后 GITHUB_TOKEN 无法直接推 main，改用 GitHub App token（App 已加入绕过名单）
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: RedrockTeam
+          repositories: RedRockBlog
+
+      # 只有合并进 main 之后才生成日志并推回 main；App token 推送会触发工作流，提交消息带 [skip ci] 防止递归
       - name: Commit generated logs to main
         id: commit-logs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           # 先暂存再判断：git diff 会忽略新生成的未跟踪文件，git add 后 diff --cached 才能发现
           git add content/log
           if ! git diff --cached --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit -m "chore: 自动生成日志条目（PR 标签 log）"
+            git commit -m "chore: 自动生成日志条目（PR 标签 log）[skip ci]"
+            git remote set-url origin "https://x-access-token:${APP_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
             # 多个回写工作流并行时可能撞车，失败自动变基重试
             ok=0
             for attempt in 1 2 3 4 5; do
