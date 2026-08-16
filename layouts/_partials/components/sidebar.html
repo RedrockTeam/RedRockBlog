@@ -85,7 +85,11 @@
                   <div class="mt-2 flex flex-wrap gap-3 text-neutral-500 dark:text-neutral-400">
                     {{ range . }}
                       <a href="{{ .url }}" target="_blank" rel="noopener" aria-label="{{ .icon }}" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                        {{ partial "functions/get_icon" (dict "name" .icon "attributes" "class=\"h-4 w-4\"") }}
+                        {{ if hasPrefix .icon "http" }}
+                          <img src="{{ .icon | safeURL }}" alt="" loading="lazy" class="inline-block" style="height:1em; width:auto;" />
+                        {{ else }}
+                          {{ partial "functions/get_icon" (dict "name" .icon "attributes" "class=\"h-4 w-4\"") }}
+                        {{ end }}
                       </a>
                     {{ end }}
                   </div>
