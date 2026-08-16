@@ -15,7 +15,7 @@
       {{ $avatar := $profile.avatar }}
       {{ $count := .Count }}
 
-      <div class="group bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm rounded-2xl ring-1 ring-zinc-900/5 dark:ring-white/10 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-1 p-8 flex flex-col items-center text-center">
+      <div class="group rounded-2xl ring-1 ring-zinc-900/10 dark:ring-white/10 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-1 p-8 flex flex-col items-center text-center">
         <a href="{{ .Page.RelPermalink }}" class="block" aria-label="{{ $profile.title }}">
           {{ if $avatar }}
             {{ if reflect.IsImageResourceProcessable $avatar }}
@@ -41,7 +41,7 @@
               />
             {{ end }}
           {{ else }}
-            <div class="h-24 w-24 mx-auto rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center ring-2 ring-primary-500/20">
+            <div class="h-24 w-24 mx-auto rounded-full flex items-center justify-center ring-2 ring-primary-500/20">
               {{ partial "functions/get_icon" (dict "name" "hero/user" "attributes" "class=\"h-10 w-10 text-zinc-400\"") }}
             </div>
           {{ end }}

@@ -1,6 +1,7 @@
 hugoblox:
   theme:
     pack: cupcake
+    mode: dark
   header:
     theme_picker: true
   locale:

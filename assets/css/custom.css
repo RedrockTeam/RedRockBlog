@@ -12,3 +12,52 @@
     transform: translateX(-50%);
   }
 }
+
+/* 深色图片背景的 hero：两种主题下统一使用浅色文字 */
+.hero-image-bg {
+  color: #f8fafc;
+}
+
+.hero-image-bg h1,
+.hero-image-bg .text-gray-900,
+.hero-image-bg .text-gray-600,
+.hero-image-bg .text-gray-500,
+.hero-image-bg .text-gray-700,
+.hero-image-bg .text-gray-800 {
+  color: #f8fafc;
+}
+
+.hero-image-bg .ring-gray-300 {
+  --tw-ring-color: rgb(255 255 255 / 0.25);
+}
+
+/* 全站背景图 */
+body {
+  background-image: linear-gradient(rgb(131 24 67 / 0.28), rgb(76 5 25 / 0.28)), url("/background.png");
+  background-size: cover, cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* 去除页头底色，让背景图透出 */
+#site-header.header {
+  background-color: transparent;
+}
+
+/* 深色模式下提亮次级灰色文字，保证在背景图上可读 */
+.dark .text-zinc-400,
+.dark .text-zinc-500,
+.dark .text-zinc-600,
+.dark .text-gray-400,
+.dark .text-gray-500,
+.dark .text-neutral-400,
+.dark .text-neutral-500 {
+  color: #d4d4d8;
+}
+
+/* 导航下拉菜单背景完全透明 */
+.nav-dropdown-list,
+.nav-dropdown-list:where(.dark, .dark *) {
+  background-color: transparent;
+}

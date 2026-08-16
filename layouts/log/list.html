@@ -15,18 +15,18 @@
   "show_read_more" (.Params.show_read_more | default true)
 }}
 
-<div class="flex flex-col items-center pb-12">
+<div class="w-full max-w-4xl mx-auto px-6 pb-12">
+  <div class="space-y-10 rounded-2xl px-6 py-8 sm:px-8">
+    {{ partial "functions/render_view" (dict "fragment" "start" "page" $block "item" . "view" $view "config" $config) }}
 
-  {{ partial "functions/render_view" (dict "fragment" "start" "page" $block "item" . "view" $view "config" $config) }}
+    {{ range $index, $item := $paginator.Pages }}
+    {{ partial "functions/render_view" (dict "page" . "item" . "view" $view "index" $index "config" $config) }}
+    {{end}}
 
-  {{ range $index, $item := $paginator.Pages }}
-  {{ partial "functions/render_view" (dict "page" . "item" . "view" $view "index" $index "config" $config) }}
-  {{end}}
+    {{ partial "functions/render_view" (dict "fragment" "end" "page" $block "item" . "view" $view) }}
 
-  {{ partial "functions/render_view" (dict "fragment" "end" "page" $block "item" . "view" $view) }}
-
-  {{ partial "components/paginator" . }}
-
+    {{ partial "components/paginator" . }}
+  </div>
 </div>
 
 {{ end }}
