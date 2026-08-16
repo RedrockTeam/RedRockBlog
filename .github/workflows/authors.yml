@@ -4,11 +4,15 @@ on:
   pull_request:
     paths:
       - 'content/blog/**'
+      - 'content/zh/blog/**'
+      - 'content/en/blog/**'
   push:
     branches:
       - main
     paths:
       - 'content/blog/**'
+      - 'content/zh/blog/**'
+      - 'content/en/blog/**'
   workflow_dispatch:
 
 permissions:
@@ -40,13 +44,13 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             BASE="${{ github.event.pull_request.base.sha }}"
-            git diff --name-only "$BASE"...HEAD -- content/blog > /tmp/changed.txt || true
+            git diff --name-only "$BASE"...HEAD -- content/blog content/zh/blog content/en/blog > /tmp/changed.txt || true
           else
             BEFORE="${{ github.event.before }}"
             if [[ "$BEFORE" =~ ^0+$ ]]; then
               BEFORE="HEAD~1"
             fi
-            git diff --name-only "$BEFORE"...HEAD -- content/blog > /tmp/changed.txt || true
+            git diff --name-only "$BEFORE"...HEAD -- content/blog content/zh/blog content/en/blog > /tmp/changed.txt || true
           fi
           echo "changed files: $(wc -l < /tmp/changed.txt)"
 

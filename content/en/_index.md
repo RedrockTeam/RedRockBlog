@@ -1,18 +1,19 @@
+---
 title: RedRockBlog
 type: landing
-
 sections:
   - block: hero
     content:
       title: "RedRockBlog"
       text: |
-        RedRock 团队的技术博客。多作者、组件化、纯 Markdown 写作。
+        The technical blog of the RedRock team. Multi-author, component-based,
+        written in pure Markdown.
       primary_action:
-        text: "查看博客"
+        text: "View Blog"
         url: "/blog"
         icon: "hero/arrow-right"
       secondary_action:
-        text: "作者简介"
+        text: "Authors"
         url: "/authors"
     design:
       css_class: "hero-gradient"
@@ -24,23 +25,23 @@ sections:
 
   - block: features
     content:
-      title: "站点特点"
+      title: "Site Features"
       items:
-        - name: "多作者"
-          description: "每个作者都有独立简介页，文章自动聚合"
+        - name: "Multi-author"
+          description: "Every author has a profile page, with posts aggregated automatically"
           icon: "hero/users"
-        - name: "组件化"
-          description: "区块拼装页面，新增板块不动模板"
+        - name: "Component-based"
+          description: "Pages are assembled from blocks; add sections without touching templates"
           icon: "hero/squares-2x2"
-        - name: "GitHub 工作流"
-          description: "贡献者只交文章 md，作者档案自动生成"
+        - name: "GitHub workflow"
+          description: "Contributors only submit article markdown; author profiles are generated automatically"
           icon: "hero/rocket-launch"
     design:
       columns: 3
 
   - block: collection
     content:
-      title: "最新文章"
+      title: "Latest Posts"
       count: 5
       filters:
         folders:
@@ -48,3 +49,6 @@ sections:
     design:
       view: article-grid
       columns: 2
+---
+
+RedRockBlog homepage. Page sections are configured via the `sections` front matter.

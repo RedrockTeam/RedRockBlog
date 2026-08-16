@@ -1,7 +1,7 @@
 main:
-  - name: 博客
+  - name: Blog
     url: /blog
     weight: 10
-  - name: 作者
+  - name: Authors
     url: /authors
     weight: 20

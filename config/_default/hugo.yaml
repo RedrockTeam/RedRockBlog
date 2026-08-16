@@ -1,6 +1,23 @@
 baseURL: https://example.org/
 title: RedRockBlog
 
+defaultContentLanguage: zh
+defaultContentLanguageInSubdir: false
+
+languages:
+  zh:
+    languageCode: zh-CN
+    languageName: 中文
+    contentDir: content/zh
+    weight: 1
+  en:
+    languageCode: en-US
+    languageName: English
+    contentDir: content/en
+    weight: 2
+
+timeZone: Asia/Shanghai
+
 build:
   buildStats:
     enable: true
