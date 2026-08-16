@@ -27,6 +27,7 @@ jobs:
       GO_VERSION: '1.26'
       NODE_VERSION: 22
       TZ: Asia/Shanghai
+      HUGO_CACHEDIR: ${{ runner.temp }}/hugo_cache
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -61,11 +62,20 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
+            ~/.npm
             node_modules
             themes/hugo-blox-builder/node_modules
           key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json', 'package.json', 'themes/hugo-blox-builder/package.json', 'themes/hugo-blox-builder/pnpm-lock.yaml') }}
           restore-keys: |
             npm-${{ runner.os }}-
+
+      - name: Cache Hugo resources
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/hugo_cache
+          key: hugo-resources-${{ runner.os }}-${{ hashFiles('assets/**', 'layouts/**', 'config/**', 'data/**', 'content/**', 'themes/hugo-blox-builder/modules/**', 'themes/hugo-blox-builder/layouts/**', 'themes/hugo-blox-builder/assets/**', 'go.mod') }}
+          restore-keys: |
+            hugo-resources-${{ runner.os }}-
 
       - name: Install JS dependencies
         run: |
