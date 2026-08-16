@@ -63,7 +63,13 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/authors assets/media/authors
+          # 目录可能不存在（例如作者被全部删除时），存在才 add，避免 pathspec 报错
+          if [ -d data/authors ]; then
+            git add data/authors
+          fi
+          if [ -d assets/media/authors ]; then
+            git add assets/media/authors
+          fi
           if git diff --cached --quiet; then
             echo "无新档案，无需提交"
             exit 0
