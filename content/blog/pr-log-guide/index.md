@@ -1,6 +1,6 @@
 ---
 title: "PR 自动生成日志"
-date: 2026-08-16
+date: 2026-08-16T19:09:52+08:00
 summary: "给 PR 打上 log 标签，合并后 CI 会自动把 PR 标题和描述生成到日志栏。"
 tags:
   - 指南
@@ -27,4 +27,4 @@ authors:
 - 不想记录到日志栏的 PR 不要打 `log` 标签
 - PR 描述的第一段会被用作日志摘要，建议写清楚本次改动的要点
 - 生成的日志条目会自动附带来源 PR 链接
-- 也可以手动在 `content/log/` 下写日志条目，必填 `title` / `date` / `summary`
+- 也可以手动在 `content/log/` 下写日志条目，必填 `title` / `summary`，`date` 会自动按首次提交时间填写

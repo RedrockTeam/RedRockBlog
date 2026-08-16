@@ -1,0 +1,52 @@
+name: Sync Content Dates from Git
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'content/blog/**'
+      - 'content/log/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# 防止多个 PR 合并后并发推送互相冲突
+concurrency:
+  group: content-dates
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  sync-dates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Fill dates from first commit
+        run: python .github/scripts/generate_commit_dates.py
+
+      - name: Commit dates to main
+        run: |
+          git add content/blog content/log
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore: 自动写入文章首次提交时间"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          else
+            echo "日期已一致，无需提交"
+          fi

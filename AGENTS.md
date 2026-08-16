@@ -20,11 +20,15 @@
 
 ### 博客文章 `content/blog/<英文短名>/index.md`
 
-必填 front matter：`title`、`date`、`summary`、`authors`（GitHub 用户名）；`tags` 可选。缺少必填字段时 CI 会阻止合并。
+必填 front matter：`title`、`summary`、`authors`（GitHub 用户名）；`tags` 可选；`date` 可选，由 CI 自动从文章首次提交时间写入。缺少必填字段时 CI 会阻止合并。
 
 ### 日志条目 `content/log/<短名>/index.md`
 
-必填 front matter：`title`、`date`、`summary`；不需要作者字段。由 CI 自动生成的条目额外带 `pr` 字段（PR 编号），用于幂等去重，手工维护时不要删除。
+必填 front matter：`title`、`summary`；不需要作者字段；`date` 由 CI 自动写入。由 CI 自动生成的条目额外带 `pr` 字段（PR 编号），用于幂等去重，手工维护时不要删除。
+
+### 显示与排序时间
+
+页面显示和排序使用 front matter 的 `date`，其值由 CI（`.github/scripts/generate_commit_dates.py`）自动维护为文章的首次提交时间（`git log --reverse`）；CI 生成的日志条目取 PR 合并时间。作者无需手写 `date`，也不要手动改它（会被 CI 覆盖为首次提交时间）。
 
 ### 模板定制
 

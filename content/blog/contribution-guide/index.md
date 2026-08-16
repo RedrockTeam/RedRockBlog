@@ -1,14 +1,14 @@
 ---
 title: "贡献博客指引"
-date: 2026-08-16
-summary: "任何人都可以给红岩博客投稿：在 content/blog/ 下新建一篇 Markdown 文章，填好必填字段，提一个 Pull Request，合并后自动部署上线。"
+date: 2026-08-16T18:13:13+08:00
+summary: "给红岩博客投稿：在 content/blog/ 下新建一篇 Markdown 文章，填好必填字段，提一个 Pull Request，合并后自动部署上线。"
 tags:
   - 指南
 authors:
   - mkaaad
 ---
 
-红岩博客欢迎任何人投稿。写一篇文章只需要一个 Markdown 文件，剩下的自动化和部署都交给 CI。
+红岩博客欢迎投稿。写一篇文章只需要一个 Markdown 文件，剩下的自动化和部署都交给 CI。
 
 ## 文章放在哪里
 
@@ -27,7 +27,6 @@ content/blog/<文章英文短名>/index.md
 ```yaml
 ---
 title: "文章标题"
-date: 2026-08-16
 summary: "一句话简介，会显示在博客卡片和分享描述里。"
 tags:
   - 指南
@@ -37,10 +36,10 @@ authors:
 ```
 
 - `title`：文章标题
-- `date`：发布日期（年月日即可）
 - `summary`：一句话简介
 - `authors`：你的 GitHub 用户名（不是昵称）
 - `tags`：可选，一个或多个标签
+- `date`：可选，不用写。CI 会自动按文章首次提交时间填写，并用于排序和显示
 
 ## 正文怎么写
 

@@ -76,6 +76,9 @@ jobs:
       - name: Generate author contribution order
         run: python .github/scripts/author_contrib.py
 
+      - name: Generate first-commit dates (temporary)
+        run: python .github/scripts/generate_commit_dates.py
+
       - name: Build
         run: |
           hugo build --gc --minify --baseURL "${{ steps.pages.outputs.base_url }}/"
