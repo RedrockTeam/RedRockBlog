@@ -31,13 +31,9 @@
   --tw-ring-color: rgb(255 255 255 / 0.25);
 }
 
-/* 全站背景图 */
+/* 全站纯黑背景 */
 body {
-  background-image: linear-gradient(rgb(131 24 67 / 0.28), rgb(76 5 25 / 0.28)), url("../background.png");
-  background-size: cover, cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  background-color: #000;
 }
 
 /* 去除页头底色，让背景图透出 */
