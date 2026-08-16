@@ -27,7 +27,6 @@ links:
 - `name.display`：页面显示的名字
 - `role`：职务 / 角色（会显示在作者页和文章卡片上）
 - `bio`：个人简介
-- `affiliations`：所属组织（可选）
 - `links`：社交链接列表，每项是 `icon` + `url`
 
 ## 链接图标怎么填

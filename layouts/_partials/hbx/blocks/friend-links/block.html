@@ -1,0 +1,92 @@
+{{/* 自定义区块：友链卡片墙 */}}
+{{ $block := .wcBlock }}
+{{ $content := $block.content }}
+{{ if not (reflect.IsMap $content) }}{{ $content = dict }}{{ end }}
+
+{{ $links_raw := index $content "links" }}
+{{ $links := slice }}
+{{ if reflect.IsSlice $links_raw }}{{ $links = $links_raw }}{{ end }}
+
+<div class="relative py-8 sm:py-10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      {{ range $links }}
+      {{ if reflect.IsMap . }}
+      {{ $name := "" }}
+      {{ with index . "name" }}{{ $name = strings.TrimSpace (printf "%v" .) }}{{ end }}
+      {{ $description := "" }}
+      {{ with index . "description" }}{{ $description = printf "%v" . }}{{ end }}
+      {{ $image := "" }}
+      {{ with index . "image" }}{{ $image = strings.TrimSpace (printf "%v" .) }}{{ end }}
+      {{ $url := "" }}
+      {{ with index . "url" }}{{ $url = strings.TrimSpace (printf "%v" .) }}{{ end }}
+      {{ $external := false }}
+      {{ $url_host := "" }}
+      {{ $url_scheme := "" }}
+      {{ if $url }}
+        {{ $parsed := urls.Parse $url }}
+        {{ if in (slice "http" "https") $parsed.Scheme }}{{ $external = true }}{{ end }}
+        {{ with $parsed.Host }}{{ $url_host = . }}{{ end }}
+        {{ $url_scheme = $parsed.Scheme }}
+      {{ end }}
+
+      {{/* 头像：优先 image 字段（URL 或本地路径），没配就用站点 favicon，再无兜底站名首字 */}}
+      {{ $avatar_url := "" }}
+      {{ if $image }}
+        {{ $is_remote := or (strings.HasPrefix $image "http://") (strings.HasPrefix $image "https://") }}
+        {{ if $is_remote }}
+          {{ $avatar_url = $image }}
+        {{ else }}
+          {{ $image_path := strings.TrimPrefix "/" $image }}
+          {{ $image_path = strings.TrimPrefix "assets/" $image_path }}
+          {{ $image_path = strings.TrimPrefix "media/" $image_path }}
+          {{ $img := resources.Get (printf "media/%s" $image_path) }}
+          {{ if $img }}
+            {{ $isProcessable := reflect.IsImageResourceProcessable $img }}
+            {{ if $isProcessable }}{{ $img = $img.Fit "96x96 Center webp" }}{{ end }}
+            {{ $avatar_url = $img.RelPermalink }}
+          {{ else }}
+            {{ $avatar_url = printf "/media/%s" $image_path }}
+          {{ end }}
+        {{ end }}
+      {{ else if and $url_host (in (slice "http" "https") $url_scheme) }}
+        {{ $avatar_url = printf "%s://%s/favicon.ico" $url_scheme $url_host }}
+      {{ end }}
+
+      <a href="{{ $url | safeURL }}"
+         {{ if $external }}target="_blank" rel="noopener noreferrer"{{ end }}
+         aria-label="{{ $name }}"
+         class="group flex items-start gap-4 rounded-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-900/70 backdrop-blur p-5 shadow-sm hover:shadow-md hover:border-primary-300 dark:hover:border-primary-700 hover:-translate-y-0.5 transition-all duration-300">
+        <div class="flex-shrink-0">
+          {{ if $avatar_url }}
+          <span class="relative block h-12 w-12">
+            <img src="{{ $avatar_url }}" alt="{{ $name }}"
+                 class="h-12 w-12 rounded-xl object-cover"
+                 loading="lazy"
+                 onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')">
+            <span class="hidden absolute inset-0 flex items-center justify-center rounded-xl bg-primary-600/90 text-lg font-bold text-white">{{ substr $name 0 1 }}</span>
+          </span>
+          {{ else }}
+          <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-600/90 text-lg font-bold text-white">
+            {{ substr $name 0 1 }}
+          </span>
+          {{ end }}
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-1.5">
+            <span class="truncate font-semibold text-neutral-900 dark:text-neutral-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{{ $name }}</span>
+            {{ if $external }}<span class="text-xs text-neutral-400" aria-hidden="true">↗</span>{{ end }}
+          </div>
+          {{ with $description }}
+          <div class="mt-1 line-clamp-2 text-sm text-neutral-600 dark:text-neutral-400">{{ . }}</div>
+          {{ end }}
+          {{ with $url_host }}
+          <div class="mt-1 truncate text-xs text-neutral-400 dark:text-neutral-500">{{ . }}</div>
+          {{ end }}
+        </div>
+      </a>
+      {{ end }}
+      {{ end }}
+    </div>
+  </div>
+</div>
