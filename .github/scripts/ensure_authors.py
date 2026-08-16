@@ -21,11 +21,7 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(os.getcwd())
-BLOG_DIRS = [
-    ROOT / "content" / "blog",
-    ROOT / "content" / "zh" / "blog",
-    ROOT / "content" / "en" / "blog",
-]
+BLOG_DIR = ROOT / "content" / "blog"
 AUTHORS_DIR = ROOT / "data" / "authors"
 MEDIA_DIR = ROOT / "assets" / "media" / "authors"
 TOKEN = os.environ.get("GH_TOKEN", "")
@@ -109,7 +105,7 @@ def main():
 
     for rel in changed:
         path = ROOT / rel
-        if not path.is_file() or not any(d in path.parents for d in BLOG_DIRS):
+        if not path.is_file() or BLOG_DIR not in path.parents:
             continue
 
         front_matter = parse_front_matter(path.read_text(encoding="utf-8"))

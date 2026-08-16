@@ -70,7 +70,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # 构建前临时生成所有文章引用的作者档案（不入库），确保部署包含作者页
-          find content/blog content/zh/blog content/en/blog -mindepth 2 -name '*.md' -print > /tmp/blog_files.txt 2>/dev/null
+          find content/blog -mindepth 2 -name '*.md' -print > /tmp/blog_files.txt
           python .github/scripts/ensure_authors.py /tmp/blog_files.txt
 
       - name: Generate author contribution order

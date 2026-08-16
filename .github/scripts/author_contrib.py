@@ -17,11 +17,7 @@ from pathlib import Path
 import yaml
 
 ROOT = Path.cwd()
-BLOG_DIRS = [
-    ROOT / "content" / "blog",
-    ROOT / "content" / "zh" / "blog",
-    ROOT / "content" / "en" / "blog",
-]
+BLOG_DIR = ROOT / "content" / "blog"
 AUTHORS_DIR = ROOT / "data" / "authors"
 OUTPUT = ROOT / "data" / "author_contrib.yaml"
 
@@ -49,16 +45,12 @@ def author_aliases(slug):
 
 
 def main():
-    blog_dirs = [d for d in BLOG_DIRS if d.is_dir()]
-    if not blog_dirs:
-        print("未找到博客目录，跳过。")
+    if not BLOG_DIR.is_dir():
+        print("未找到 content/blog 目录，跳过。")
         return
 
     result = {}
-    markdowns = []
-    for blog_dir in blog_dirs:
-        markdowns.extend(blog_dir.rglob("index.md"))
-    for markdown in sorted(markdowns):
+    for markdown in sorted(BLOG_DIR.rglob("index.md")):
         text = markdown.read_text(encoding="utf-8")
         if not text.startswith("---"):
             continue
