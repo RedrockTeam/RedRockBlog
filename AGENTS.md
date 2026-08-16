@@ -48,5 +48,4 @@
 - 默认分支 `main`；新功能在 `feat/*` 分支开发，通过 PR 合入。
 - 提交信息用中文，建议前缀 `feat:` / `fix:` / `chore:` 等。
 - Python 脚本放在 `.github/scripts/`，使用 PyYAML，中文输出，GitHub API 用 `GH_TOKEN`。
-- 修改模板或内容后必须运行 `hugo build` 验证通过再提交。
 - 新增 CI 工作流后检查：YAML 可解析、权限最小化、并发安全、无递归触发风险。

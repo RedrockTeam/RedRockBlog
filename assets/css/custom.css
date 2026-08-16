@@ -3,3 +3,12 @@
 .prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::after {
   content: none;
 }
+
+/* 桌面端导航菜单相对页面水平居中，与下方页面内容对齐 */
+@media (min-width: 1024px) {
+  #nav-menu {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
