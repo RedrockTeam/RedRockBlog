@@ -36,9 +36,9 @@ body {
   background-color: #000;
 }
 
-/* 去除页头底色，让背景图透出 */
+/* 导航栏使用纯黑底色，滚动时内容不从下方透出 */
 #site-header.header {
-  background-color: transparent;
+  background-color: #000;
 }
 
 /* 文字颜色在深浅主题下统一为浅色，保证在深色背景图上可读 */

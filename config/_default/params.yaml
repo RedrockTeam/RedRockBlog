@@ -4,5 +4,6 @@ hugoblox:
     mode: dark
   header:
     theme_picker: true
+    sticky: true
   locale:
     date_format: "2006年1月2日"
