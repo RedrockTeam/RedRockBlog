@@ -1,0 +1,29 @@
+{{/* Return post authors ordered by line contribution (most lines first).
+     Falls back to front-matter order when git stats are unavailable. */}}
+
+{{ $page := .page }}
+{{ $authors := slice }}
+{{ with $page.Params.authors }}
+  {{ if reflect.IsSlice . }}
+    {{ $authors = . }}
+  {{ else }}
+    {{ $authors = slice . }}
+  {{ end }}
+{{ end }}
+
+{{ $ordered := $authors }}
+{{ with index site.Data.author_contrib $page.File.Path }}
+  {{ $ordered = slice }}
+  {{ range $slug := . }}
+    {{ if in $authors $slug }}
+      {{ $ordered = $ordered | append $slug }}
+    {{ end }}
+  {{ end }}
+  {{ range $author := $authors }}
+    {{ if not (in $ordered $author) }}
+      {{ $ordered = $ordered | append $author }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ return $ordered }}

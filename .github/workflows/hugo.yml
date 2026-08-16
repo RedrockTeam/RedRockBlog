@@ -62,6 +62,12 @@ jobs:
           npm install --no-audit --no-fund --prefix themes/hugo-blox-builder
           npm install --no-audit --no-fund
 
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Generate author contribution order
+        run: python .github/scripts/author_contrib.py
+
       - name: Build
         run: |
           hugo build --gc --minify --baseURL "${{ steps.pages.outputs.base_url }}/"

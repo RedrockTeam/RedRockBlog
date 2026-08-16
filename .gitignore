@@ -5,3 +5,4 @@
 /node_modules/
 /hugo_stats.json
 /assets/jsconfig.json
+/data/author_contrib.yaml

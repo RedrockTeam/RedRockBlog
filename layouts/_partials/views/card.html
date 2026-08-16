@@ -163,7 +163,10 @@
         <div class="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-500 flex-wrap mb-3">
           {{ if $item.Params.authors }}
           <div class="flex items-center gap-2 min-w-0">
-            {{ range $index, $raw := $item.Params.authors }}
+            {{ $orderedAuthors := partial "functions/order-authors.html" (dict "page" $item) }}
+            {{ $shown := 2 }}
+            {{ range $index, $raw := $orderedAuthors }}
+              {{ if ge $index $shown }}{{ break }}{{ end }}
               {{ $slug := $raw | urlize }}
               {{ $profile := partial "functions/get_author_profile" (dict "slug" $slug "title" $raw) }}
               {{ $avatar := $profile.avatar }}
@@ -181,6 +184,9 @@
                 {{ end }}
               </div>
               <span class="truncate max-w-[9rem] text-sm">{{ $profile.title }}</span>
+            {{ end }}
+            {{ if gt (len $orderedAuthors) $shown }}
+              <span class="opacity-40 text-sm">+{{ sub (len $orderedAuthors) $shown }}</span>
             {{ end }}
           </div>
           <span class="opacity-40">•</span>
