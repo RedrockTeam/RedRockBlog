@@ -1,0 +1,95 @@
+{{ define "main" }}
+
+{{/* 作者列表页：标题 + 简介 + 作者卡片网格 */}}
+<div class="max-w-screen-lg mx-auto px-6 py-12">
+  <header class="text-center mb-12">
+    <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+      {{ .Title }}
+    </h1>
+    {{ with .Content }}
+      <p class="mt-4 text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+        {{ . | plainify | htmlUnescape }}
+      </p>
+    {{ end }}
+  </header>
+
+  {{ $terms := .Data.Terms.ByCount }}
+  {{ if not $terms }}
+    {{ $terms = .Data.Terms.Alphabetical }}
+  {{ end }}
+
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {{ range $terms }}
+      {{ $slug := .Term | default .Name }}
+      {{ $profile := partial "functions/get_author_profile" (dict "slug" $slug) }}
+      {{ $avatar := $profile.avatar }}
+      {{ $count := .Count }}
+
+      <div class="group bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm rounded-2xl ring-1 ring-zinc-900/5 dark:ring-white/10 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-1 p-8 flex flex-col items-center text-center">
+        <a href="{{ .Page.RelPermalink }}" class="block" aria-label="{{ $profile.title }}">
+          {{ if $avatar }}
+            {{ if reflect.IsImageResourceProcessable $avatar }}
+              {{ $avatar_192 := $avatar.Fill "192x192 Center webp" }}
+              <img
+                class="h-24 w-24 rounded-full object-cover ring-2 ring-primary-500/20 shadow-md mx-auto transition-transform duration-300 group-hover:scale-105"
+                src="{{ $avatar_192.RelPermalink }}"
+                width="96"
+                height="96"
+                alt="{{ $profile.title }}"
+                loading="lazy"
+                decoding="async"
+              />
+            {{ else }}
+              <img
+                class="h-24 w-24 rounded-full object-cover ring-2 ring-primary-500/20 shadow-md mx-auto transition-transform duration-300 group-hover:scale-105"
+                src="{{ $avatar.RelPermalink }}"
+                width="96"
+                height="96"
+                alt="{{ $profile.title }}"
+                loading="lazy"
+                decoding="async"
+              />
+            {{ end }}
+          {{ else }}
+            <div class="h-24 w-24 mx-auto rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center ring-2 ring-primary-500/20">
+              {{ partial "functions/get_icon" (dict "name" "hero/user" "attributes" "class=\"h-10 w-10 text-zinc-400\"") }}
+            </div>
+          {{ end }}
+        </a>
+
+        <a href="{{ .Page.RelPermalink }}" class="mt-4 text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+          {{ $profile.title }}
+        </a>
+
+        {{ with $profile.role }}
+          <div class="mt-1 text-sm font-medium text-neutral-600 dark:text-neutral-300">
+            {{ . | markdownify | emojify }}
+          </div>
+        {{ end }}
+
+        <div class="mt-4 inline-flex items-center gap-1.5 rounded-full bg-primary-100/70 dark:bg-primary-900/30 px-3 py-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <span>{{ $count }}</span>
+          <span>篇</span>
+        </div>
+
+        {{ with $profile.links }}
+          <div class="mt-4 flex items-center gap-3">
+            {{ range . }}
+              <a
+                href="{{ .url }}"
+                target="_blank"
+                rel="noopener"
+                aria-label="{{ .icon }}"
+                class="text-zinc-500 dark:text-zinc-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              >
+                {{ partial "functions/get_icon" (dict "name" .icon "attributes" "class=\"h-5 w-5\"") }}
+              </a>
+            {{ end }}
+          </div>
+        {{ end }}
+      </div>
+    {{ end }}
+  </div>
+</div>
+
+{{ end }}
