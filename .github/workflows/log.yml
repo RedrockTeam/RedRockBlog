@@ -57,10 +57,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if ! git diff --quiet -- content/log; then
+          # 先暂存再判断：git diff 会忽略新生成的未跟踪文件，git add 后 diff --cached 才能发现
+          git add content/log
+          if ! git diff --cached --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add content/log
             git commit -m "chore: 自动生成日志条目（PR 标签 log）"
             git pull --rebase origin main   # 合并期间 main 有变化就先变基，避免非快进失败
             git push origin HEAD:main
