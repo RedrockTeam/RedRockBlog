@@ -14,6 +14,11 @@ on:
 permissions:
   contents: write
 
+# 防止多个 PR 合并后并发推送互相冲突
+concurrency:
+  group: author-sync
+  cancel-in-progress: false
+
 jobs:
   sync-authors:
     runs-on: ubuntu-latest
@@ -37,7 +42,11 @@ jobs:
             BASE="${{ github.event.pull_request.base.sha }}"
             git diff --name-only "$BASE"...HEAD -- content/blog > /tmp/changed.txt || true
           else
-            git diff --name-only HEAD~1...HEAD -- content/blog > /tmp/changed.txt || true
+            BEFORE="${{ github.event.before }}"
+            if [[ "$BEFORE" =~ ^0+$ ]]; then
+              BEFORE="HEAD~1"
+            fi
+            git diff --name-only "$BEFORE"...HEAD -- content/blog > /tmp/changed.txt || true
           fi
           echo "changed files: $(wc -l < /tmp/changed.txt)"
 
@@ -46,7 +55,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Commit generated profiles
+      # 只有合并进 main 之后才生成档案并推回 main；PR 阶段只校验，不回推分支
+      - name: Commit generated profiles to main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -55,7 +66,9 @@ jobs:
           git add data/authors assets/media/authors
           if git diff --cached --quiet; then
             echo "无新档案，无需提交"
+            exit 0
           else
             git commit -m "chore: 自动生成作者档案"
-            git push || echo "推送失败：fork PR 无法自动推送，请手动添加生成的档案"
+            git pull --rebase origin main   # 合并期间 main 有变化就先变基，避免非快进失败
+            git push origin HEAD:main
           fi
