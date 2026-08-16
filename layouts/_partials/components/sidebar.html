@@ -18,47 +18,49 @@
           {{ $profile := partial "functions/get_author_profile" (dict "slug" $slug "title" $raw) }}
           {{ $avatar := $profile.avatar }}
           <div class="mb-8">
-            <a href="{{ printf "/authors/%s/" $slug | relLangURL }}" class="flex items-center gap-3 no-underline group">
-              {{ if $avatar }}
-                {{ if reflect.IsImageResourceProcessable $avatar }}
-                  {{ $avatar_48 := $avatar.Process "Fill 48x48 Center webp" }}
-                  <img
-                    class="h-12 w-12 rounded-full object-cover ring-2 ring-primary-500/15 shrink-0"
-                    src="{{ $avatar_48.RelPermalink }}"
-                    width="48"
-                    height="48"
-                    alt="{{ $profile.title }}"
-                    loading="lazy"
-                    decoding="async"
-                  />
+            <a href="{{ printf "/authors/%s/" $slug | relLangURL }}" class="block no-underline group">
+              <div class="flex items-center gap-3">
+                {{ if $avatar }}
+                  {{ if reflect.IsImageResourceProcessable $avatar }}
+                    {{ $avatar_48 := $avatar.Process "Fill 48x48 Center webp" }}
+                    <img
+                      class="h-12 w-12 rounded-full object-cover ring-2 ring-primary-500/15 shrink-0"
+                      src="{{ $avatar_48.RelPermalink }}"
+                      width="48"
+                      height="48"
+                      alt="{{ $profile.title }}"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  {{ else }}
+                    <img
+                      class="h-12 w-12 rounded-full object-cover ring-2 ring-primary-500/15 shrink-0"
+                      src="{{ $avatar.RelPermalink }}"
+                      width="48"
+                      height="48"
+                      alt="{{ $profile.title }}"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  {{ end }}
                 {{ else }}
-                  <img
-                    class="h-12 w-12 rounded-full object-cover ring-2 ring-primary-500/15 shrink-0"
-                    src="{{ $avatar.RelPermalink }}"
-                    width="48"
-                    height="48"
-                    alt="{{ $profile.title }}"
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  <div class="h-12 w-12 shrink-0 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                    {{ partial "functions/get_icon" (dict "name" "hero/user" "attributes" "class=\"h-6 w-6 text-zinc-400\"") }}
+                  </div>
                 {{ end }}
-              {{ else }}
-                <div class="h-12 w-12 shrink-0 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                  {{ partial "functions/get_icon" (dict "name" "hero/user" "attributes" "class=\"h-6 w-6 text-zinc-400\"") }}
+                <div class="min-w-0">
+                  <div class="font-semibold text-neutral-800 dark:text-neutral-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    {{ $profile.title }}
+                  </div>
+                  {{ with $profile.role }}
+                    <div class="text-xs text-neutral-500 dark:text-neutral-400">{{ . | markdownify | emojify }}</div>
+                  {{ end }}
                 </div>
-              {{ end }}
-              <div class="min-w-0">
-                <div class="font-semibold text-neutral-800 dark:text-neutral-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                  {{ $profile.title }}
-                </div>
-                {{ with $profile.role }}
-                  <div class="text-xs text-neutral-500 dark:text-neutral-400">{{ . | markdownify | emojify }}</div>
-                {{ end }}
               </div>
+              {{ with $profile.bio }}
+                <div class="mt-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">{{ . | markdownify | emojify }}</div>
+              {{ end }}
             </a>
-            {{ with $profile.bio }}
-              <div class="mt-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">{{ . | markdownify | emojify }}</div>
-            {{ end }}
             {{ with $profile.links }}
               <div class="mt-2 flex flex-wrap gap-3 text-neutral-500 dark:text-neutral-400">
                 {{ range . }}

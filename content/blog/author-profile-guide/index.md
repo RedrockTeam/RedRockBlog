@@ -41,7 +41,7 @@ links:
 
 - 当一篇新文章引用了**还没有档案**的作者时，CI 会自动从 GitHub 抓取名字、简介和头像，创建 `data/authors/<用户名>.yaml`。
 - **已存在的档案不会被覆盖**——你手动维护的内容始终保留。
-- 文章 front matter 必须包含 `title`、`date`、`summary`、`authors`（填 GitHub 用户名），否则 PR 校验会报错。
+- 文章 front matter 必须包含 `title`、`summary`、`authors`（填 GitHub 用户名），`date` 可选，CI 会自动按首次提交时间写入，否则 PR 校验会报错。
 
 ## 怎么提交修改
 
