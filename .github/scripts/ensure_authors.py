@@ -4,7 +4,7 @@
 Usage: ensure_authors.py <changed-files-list>
 
 For each changed post under content/blog/, parse front matter and:
-1. Validate required fields (title, date, summary, authors).
+1. Validate required fields (title, summary, authors).
 2. For every author slug without a data/authors/<slug>.yaml, create one
    from the GitHub API (name, bio, link) and download their avatar.
 
@@ -114,7 +114,7 @@ def main():
             errors.append(f"{rel}: 缺少 YAML front matter（文件必须以 --- 开头）")
             continue
 
-        for field in ("title", "date", "summary"):
+        for field in ("title", "summary"):
             if not front_matter.get(field):
                 errors.append(f"{rel}: 缺少必填字段 {field}")
 

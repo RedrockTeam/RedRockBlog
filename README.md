@@ -22,7 +22,7 @@ hugo server
 
 ## 如何投稿
 
-见《[贡献博客指引](/blog/contribution-guide/)》：在 `content/blog/<英文短名>/index.md` 写文章，front matter 必填 `title` / `date` / `summary` / `authors`，发起 Pull Request，CI 校验通过后合并，站点自动重新部署。
+见《[贡献博客指引](/blog/contribution-guide/)》：在 `content/blog/<英文短名>/index.md` 写文章，front matter 必填 `title` / `summary` / `authors`（`date` 可选，CI 自动按首次提交时间写入），发起 Pull Request，CI 校验通过后合并，站点自动重新部署。
 
 ## 日志栏（修复日志 / 公告）
 
@@ -34,7 +34,7 @@ hugo server
 2. PR 合并进 `main` 后，CI 自动用 PR 标题生成日志标题、用 PR 描述第一段生成摘要
 3. 自动生成 `content/log/pr-<编号>/index.md` 并推回仓库，站点随即重新部署
 
-不想记录到日志栏的 PR 不需要打标签。也可以手动在 `content/log/<短名>/index.md` 写条目（必填 `title` / `date` / `summary`）。
+不想记录到日志栏的 PR 不需要打标签。也可以手动在 `content/log/<短名>/index.md` 写条目（必填 `title` / `summary`，`date` 自动）。
 
 ## CI/CD
 

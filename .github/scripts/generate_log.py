@@ -140,7 +140,7 @@ def generate_entry(pr):
         date = (
             datetime.fromisoformat(merged_at.replace("Z", "+00:00"))
             .astimezone(TZ)
-            .strftime("%Y-%m-%d")
+            .strftime("%Y-%m-%dT%H:%M:%S%z")
         )
     else:
         date = datetime.now(TZ).strftime("%Y-%m-%d")
