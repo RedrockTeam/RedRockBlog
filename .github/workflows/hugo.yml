@@ -1,0 +1,100 @@
+name: Deploy Hugo site to Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只允许一个 Pages 部署，排队中的运行跳过；不取消进行中的生产部署
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # 与本地 hugo 版本保持一致（hugo version 查看）
+      HUGO_VERSION: 0.161.1
+      DART_SASS_VERSION: 1.101.0
+      # 构建时区，影响文章日期
+      TZ: Asia/Shanghai
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          lfs: false
+
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v6
+
+      - name: Create a local tools directory
+        run: |
+          mkdir -p "${HOME}/.local"
+
+      - name: Install Dart Sass
+        run: |
+          curl -sfL --output-dir "${{ runner.temp }}" -O \
+            "https://github.com/sass/dart-sass/releases/download/${DART_SASS_VERSION}/dart-sass-${DART_SASS_VERSION}-linux-x64.tar.gz"
+          tar -C "${HOME}/.local" -xf "${{ runner.temp }}/dart-sass-${DART_SASS_VERSION}-linux-x64.tar.gz"
+          echo "${HOME}/.local/dart-sass" >> "${GITHUB_PATH}"
+
+      - name: Install Hugo
+        run: |
+          curl -sfL --output-dir "${{ runner.temp }}" -O \
+            "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
+          mkdir -p "${HOME}/.local/hugo"
+          tar -C "${HOME}/.local/hugo" -xf "${{ runner.temp }}/hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
+          echo "${HOME}/.local/hugo" >> "${GITHUB_PATH}"
+
+      - name: Cache restore
+        id: cache-restore
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ runner.temp }}/.cache/hugo
+          key: hugo-${{ github.run_id }}
+          restore-keys: hugo-
+
+      - name: Build
+        run: |
+          hugo build \
+            --gc \
+            --minify \
+            --baseURL "${{ steps.pages.outputs.base_url }}/" \
+            --cacheDir "${{ runner.temp }}/.cache/hugo"
+
+      - name: Cache save
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ runner.temp }}/.cache/hugo
+          key: ${{ steps.cache-restore.outputs.cache-primary-key }}
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          include-hidden-files: false
+          path: ./public
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

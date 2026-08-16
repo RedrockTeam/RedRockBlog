@@ -1,0 +1,4 @@
+# Hugo 构建产物
+/public/
+/resources/
+.hugo_build.lock
