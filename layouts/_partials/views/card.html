@@ -26,9 +26,9 @@
 {{ $palette := slice 0 25 50 120 170 200 235 270 310 }}
 {{ $placeholder_hue := index $palette (mod (int (hash.FNV32a (or $item.File.UniqueID $item.RelPermalink))) (len $palette)) }}
 
-<a href="{{ $link }}" {{ $target | safeHTMLAttr }} class="group bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm rounded-2xl ring-1 ring-zinc-900/5 dark:ring-white/10 shadow-lg overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-primary-500/50 flex flex-col sm:flex-row" aria-labelledby="card-title-{{ $item.File.UniqueID }}">
+<a href="{{ $link }}" {{ $target | safeHTMLAttr }} class="group rounded-2xl ring-1 ring-zinc-900/10 dark:ring-white/10 shadow-lg overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-primary-500/50 flex flex-col sm:flex-row" aria-labelledby="card-title-{{ $item.File.UniqueID }}">
     <!-- Image Section -->
-    <div class="relative overflow-hidden aspect-[16/9] sm:aspect-auto sm:w-2/5 sm:shrink-0 bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
+    <div class="relative overflow-hidden aspect-[16/9] sm:aspect-auto sm:w-2/5 sm:shrink-0">
       {{/* Award badge takes priority over trending — awards are higher-signal */}}
       {{ $top_award := "" }}
       {{ with $item.Params.awards }}{{ $top_award = index . 0 }}{{ end }}
@@ -181,7 +181,7 @@
                 {{ $avatar_48 := $avatar.Process "Fill 48x48 Center webp" }}
                 <img alt="avatar" class="rounded-full object-cover" src="{{$avatar_48.RelPermalink}}" width="20" height="20" loading="lazy" decoding="async" />
               {{ else }}
-                <div class="w-5 h-5 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                <div class="w-5 h-5 rounded-full flex items-center justify-center">
                   {{ partial "functions/get_icon" (dict "name" "hero/user" "attributes" "class=\"w-3 h-3 text-gray-500 dark:text-gray-400\"") }}
                 </div>
               {{ end }}
