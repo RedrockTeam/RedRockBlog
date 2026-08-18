@@ -23,7 +23,14 @@
   {{ end }}
 {{ end }}
 
-<div class="flex flex-col items-center pb-12">
+<div class="rr-archive-page pb-16">
+  <header class="rr-page-header">
+    <p class="rr-page-header__eyebrow">REDROCK ENGINEERING</p>
+    <h1>{{ .Title }}</h1>
+    {{ with .Params.description }}<p>{{ . }}</p>{{ end }}
+  </header>
+
+  <div class="flex flex-col items-center">
 
   {{ partial "functions/render_view" (dict "fragment" "start" "page" $block "item" . "view" $view "config" $config) }}
 
@@ -35,6 +42,7 @@
 
   {{ partial "components/paginator" . }}
 
+  </div>
 </div>
 
 {{ end }}

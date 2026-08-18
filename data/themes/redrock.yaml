@@ -1,0 +1,41 @@
+# HugoBlox theme pack for the RedRock engineering blog.
+hugoblox:
+  meta:
+    format: "hugoblox-theme@1"
+    name: "RedRock"
+    vendor: "RedRock Team"
+    version: "1.0.0"
+    license: "MIT"
+    description: "Editorial dark theme for the RedRock engineering blog"
+
+  type: "dual"
+
+  light:
+    colors:
+      primary: "#d93654"
+      secondary: "#4f6fba"
+      neutral: "#30343b"
+    surfaces:
+      background: "#f6f7f9"
+      foreground: "#17191d"
+      header:
+        background: "#ffffff"
+        foreground: "#17191d"
+      footer:
+        background: "#eef0f3"
+        foreground: "#555b66"
+
+  dark:
+    colors:
+      primary: "#ff5d78"
+      secondary: "#8ba4e8"
+      neutral: "#c9cdd6"
+    surfaces:
+      background: "#090a0d"
+      foreground: "#e9ebf0"
+      header:
+        background: "#0c0e13"
+        foreground: "#f5f6f8"
+      footer:
+        background: "#07080b"
+        foreground: "#9499a5"

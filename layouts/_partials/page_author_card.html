@@ -12,11 +12,11 @@
 
   {{ $avatar := $profile.avatar }}
 
-<div class="group relative flex pt-12 pb-4">
+<div class="rr-inline-author group relative flex gap-4">
   {{ if $avatar }}
     {{ if not (reflect.IsImageResourceProcessable $avatar) }}
     <img
-      class="mr-4 h-24 w-24 {{if ne $avatar_shape "square"}}rounded-full{{end}}"
+      class="h-20 w-20 shrink-0 {{if ne $avatar_shape "square"}}rounded-full{{end}}"
       src="{{ $avatar.RelPermalink }}"
       width="96"
       height="96"
@@ -32,7 +32,7 @@
         "sizes" (slice 96 192 288 384)
     ) }}
     <img
-      class="mr-4 h-24 w-24 {{if ne $avatar_shape "square"}}rounded-full{{end}}"
+      class="h-20 w-20 shrink-0 {{if ne $avatar_shape "square"}}rounded-full{{end}}"
       srcset="{{ $responsive.srcset }}"
       sizes="96px"
       src="{{ $responsive.fallback.RelPermalink }}"
@@ -43,7 +43,7 @@
       />
     {{ end }}
   {{ end }}
-  <div class="place-self-center">
+  <div class="place-self-center min-w-0">
     <div class="text-[0.6rem] uppercase leading-3 text-neutral-500 dark:text-neutral-400">
       作者
     </div>

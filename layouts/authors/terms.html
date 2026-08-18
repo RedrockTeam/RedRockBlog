@@ -1,21 +1,27 @@
 {{ define "main" }}
 
 {{/* 作者列表页：作者卡片网格 */}}
-<div class="max-w-screen-lg mx-auto px-6 py-12">
+<div class="rr-archive-page max-w-screen-lg mx-auto px-6 pb-16">
+
+  <header class="rr-page-header">
+    <p class="rr-page-header__eyebrow">AUTHORS</p>
+    <h1>{{ .Title }}</h1>
+    {{ with .Params.description }}<p>{{ . }}</p>{{ end }}
+  </header>
 
   {{ $terms := .Data.Terms.ByCount }}
   {{ if not $terms }}
     {{ $terms = .Data.Terms.Alphabetical }}
   {{ end }}
 
-  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+  <div class="rr-author-grid">
     {{ range $terms }}
       {{ $slug := .Term | default .Name }}
       {{ $profile := partial "functions/get_author_profile" (dict "slug" $slug) }}
       {{ $avatar := $profile.avatar }}
       {{ $count := .Count }}
 
-      <div class="group rounded-2xl ring-1 ring-zinc-900/10 dark:ring-white/10 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-1 p-8 flex flex-col items-center text-center">
+      <div class="rr-author-card group overflow-hidden transition-all duration-300 p-8 flex flex-col items-center text-center">
         <a href="{{ .Page.RelPermalink }}" class="block" aria-label="{{ $profile.title }}">
           {{ if $avatar }}
             {{ if reflect.IsImageResourceProcessable $avatar }}

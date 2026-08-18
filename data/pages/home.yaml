@@ -3,28 +3,55 @@ type: landing
 
 sections:
   - block: hero
+    id: section-hero
     content:
-      title: "红岩博客"
-      text: |
-        RedRock 团队的技术博客
+      eyebrow: "REDROCK TEAM · ENGINEERING"
+      title: "记录工程实践<br>沉淀[技术思考]"
+      text: "来自 RedRock 团队的一线开发记录，关注真实项目中的架构设计、工程化实践与团队协作。"
+      primary_action:
+        text: 阅读技术文章
+        url: /blog/
+        icon: arrow-right
+        style: solid
+      secondary_action:
+        text: 了解如何投稿
+        url: /blog/contribution-guide/
+        style: text
+    design:
+      size: default
+      layout: centered
+      alignment: center
+      css_class: rr-home-hero
 
-  - block: collection
+  - block: content-collection
+    id: latest-posts
     content:
       title: "最新文章"
-      count: 5
+      text: "来自团队成员的工程实践、技术复盘与开发笔记。"
+      count: 4
       filters:
         folders:
           - blog
+      archive:
+        enable: true
+        text: 查看全部文章
     design:
       view: article-grid
       columns: 2
+      css_class: rr-home-section
 
-  - block: collection
+  - block: content-collection
+    id: recent-updates
     content:
-      title: "最近日志"
+      title: "近期动态"
+      text: "内容建设、站点演进与团队协作记录。"
       count: 5
       filters:
         folders:
           - log
+      archive:
+        enable: true
+        text: 查看全部日志
     design:
       view: date-title-summary
+      css_class: rr-home-section rr-home-updates

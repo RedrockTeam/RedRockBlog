@@ -5,7 +5,7 @@
 {{ $avatar := $profile.avatar }}
 {{ $avatar_shape := site.Params.hugoblox.layout.avatar_shape | default "circle" }}
 
-<section class="max-w-5xl mx-auto px-6 py-12">
+<section class="rr-author-profile max-w-5xl mx-auto px-6 py-12">
   <div class="flex flex-col sm:flex-row sm:items-center gap-8">
     <div class="flex-shrink-0">
       {{ if $avatar }}
@@ -72,6 +72,11 @@
     </div>
   </div>
 </section>
+
+<header class="rr-section-heading max-w-5xl mx-auto px-6">
+  <p>WRITING</p>
+  <h2>该作者的文章</h2>
+</header>
 
 {{ $view := "article-grid" }}
 {{ $block := . }}

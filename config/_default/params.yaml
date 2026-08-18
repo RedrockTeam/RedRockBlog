@@ -1,10 +1,15 @@
 hugoblox:
   theme:
-    pack: cupcake
+    pack: redrock
     mode: dark
   header:
     theme_picker: false
     theme_toggle: false
     sticky: true
+    search: false
+    cta:
+      enable: true
+      text: 参与投稿
+      url: /blog/contribution-guide/
   locale:
     date_format: "2006年1月2日"

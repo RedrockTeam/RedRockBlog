@@ -26,9 +26,9 @@
 {{ $palette := slice 0 25 50 120 170 200 235 270 310 }}
 {{ $placeholder_hue := index $palette (mod (int (hash.FNV32a (or $item.File.UniqueID $item.RelPermalink))) (len $palette)) }}
 
-<a href="{{ $link }}" {{ $target | safeHTMLAttr }} class="group rounded-2xl ring-1 ring-zinc-900/10 dark:ring-white/10 shadow-lg overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-primary-500/50 flex flex-col sm:flex-row" aria-labelledby="card-title-{{ $item.File.UniqueID }}">
+<a href="{{ $link }}" {{ $target | safeHTMLAttr }} class="rr-article-card {{ if not $resource }}rr-article-card--placeholder{{ end }} group overflow-hidden transition-all duration-300 ease-out focus-visible:ring-2 focus-visible:ring-primary-500/50 flex h-full flex-col" aria-labelledby="card-title-{{ $item.File.UniqueID }}">
     <!-- Image Section -->
-    <div class="relative overflow-hidden aspect-[16/9] sm:aspect-auto sm:w-2/5 sm:shrink-0">
+    <div class="rr-article-card__media relative overflow-hidden shrink-0">
       {{/* Award badge takes priority over trending — awards are higher-signal */}}
       {{ $top_award := "" }}
       {{ with $item.Params.awards }}{{ $top_award = index . 0 }}{{ end }}
@@ -93,11 +93,11 @@
         {{ end }}
       {{ else }}
         <!-- 占位图：随机配色的站标（颜色由文章 ID 派生） -->
-        <span class="block w-full h-full">
+        <span class="rr-article-card__placeholder block w-full h-full">
           <div class="w-full h-full flex items-center justify-center">
             {{ with resources.Get "media/icon.png" }}
             <img
-              class="h-16 w-auto opacity-90 transition-transform duration-300 group-hover:scale-110 dark:opacity-80"
+              class="h-14 w-auto opacity-90 transition-transform duration-300 group-hover:scale-105 dark:opacity-90"
               src="{{ .RelPermalink }}"
               alt="{{ $item.Title | plainify }} 占位图"
               loading="lazy"
@@ -114,7 +114,7 @@
     </div>
 
     <!-- Content Section -->
-    <div class="p-6 space-y-3 flex-1 min-w-0">
+    <div class="rr-article-card__content p-6 space-y-3 flex flex-1 min-w-0 flex-col">
       {{ with $item.Params.content_meta }}
         {{ if or .content_type .difficulty }}
         <div class="flex items-center gap-x-4">
@@ -131,7 +131,7 @@
       {{ end }}
 
       {{ if and $item.Params.tags (gt (len $item.Params.tags) 0) }}
-      <div class="flex items-center gap-2">
+      <div class="rr-article-card__tags flex items-center gap-2">
         {{ with index ($item.GetTerms "tags") 0 }}
         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-300">
           {{ .Page.LinkTitle }}
@@ -140,8 +140,8 @@
       </div>
       {{ end }}
 
-      <h3 id="card-title-{{ $item.File.UniqueID }}" class="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200 leading-tight">
-        <span class="group-hover:underline">
+      <h3 id="card-title-{{ $item.File.UniqueID }}" class="rr-article-card__title text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200 leading-tight">
+        <span>
           {{ $item.Title }}
           {{ if $item.Params.external_link }}
             {{ partial "functions/get_icon" (dict "name" "arrow-top-right-on-square" "attributes" "style=\"height: 1em;\" class=\"inline-flex h-4 w-4 ml-1 align-text-top\"") }}
@@ -149,7 +149,7 @@
         </span>
       </h3>
       
-      <p class="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed line-clamp-3">
+      <p class="rr-article-card__summary text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed line-clamp-3">
         {{ (partial "functions/get_summary" $item) | plainify | htmlUnescape | truncate 140 }}
       </p>
 
@@ -169,7 +169,7 @@
 
       <!-- Metadata section -->
       {{ if $hasMeta }}
-      <div class="pt-3 border-t border-zinc-100 dark:border-zinc-800">
+      <div class="rr-article-card__meta mt-auto pt-3 border-t border-zinc-100 dark:border-zinc-800">
         <div class="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-500 flex-wrap mb-3">
           {{ if $item.Params.authors }}
           <div class="flex items-center gap-2 min-w-0">

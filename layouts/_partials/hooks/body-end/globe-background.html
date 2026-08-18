@@ -1,60 +1,6 @@
-{{/* 全站固定底层背景：星空 + 红岩地球样式（移植自 redrock.team 首页） */}}
-<div class="rr-fixed" aria-hidden="true">
-  <div class="rr-stars"></div>
-  <div class="rr-globe">
-    <div class="rr-ball">
-      <div class="rr-line rr-line1"></div>
-      <div class="rr-line rr-line2"></div>
-      <div class="rr-line rr-line3"></div>
-      <span class="rr-pstar" style="top:24.3%;left:27.8%;width:.37vw;height:.37vw"></span>
-      <span class="rr-pstar" style="top:32%;left:30%;width:.5vw;height:.5vw"></span>
-      <span class="rr-pstar" style="top:34.7%;left:46.5%;width:.5vw;height:.5vw"></span>
-    </div>
-
-    <svg class="rr-orbit-text" width="80vw" height="80vw" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-      <defs>
-        <path id="rr-orbit-path" d="M250,250 m -235,0 a 235,235 0 1,1 470,0 a 235,235 0 1,1 -470,0" fill="transparent"></path>
-      </defs>
-      <text fill="rgba(255,255,255,.35)">
-        <textPath href="#rr-orbit-path" font-family="Aldrich" font-size="22">
-          {{ strings.Repeat 6 " WE ARE REDROCKERS. " }}
-        </textPath>
-      </text>
-    </svg>
-
-    {{ $stars := slice (dict "x" -32 "y" -28 "d" "0s") (dict "x" -8 "y" -40 "d" "1.2s") (dict "x" 12 "y" -34 "d" "0s") (dict "x" 30 "y" -16 "d" "1.8s") (dict "x" -24 "y" -8 "d" "0.6s") (dict "x" 22 "y" -4 "d" "0s") (dict "x" -2 "y" -22 "d" "2.4s") }}
-    {{ range $s := $stars }}
-      <span class="rr-wstar" style="left:{{ $s.x }}vw;top:{{ $s.y }}vw;animation-delay:{{ $s.d }}"></span>
-    {{ end }}
-  </div>
+{{/* Quiet global atmosphere: brand glow + editorial grid. Decorative only. */}}
+<div class="rr-site-backdrop" aria-hidden="true">
+  <div class="rr-site-backdrop__glow rr-site-backdrop__glow--primary"></div>
+  <div class="rr-site-backdrop__glow rr-site-backdrop__glow--secondary"></div>
+  <div class="rr-site-backdrop__grid"></div>
 </div>
-
-<style>
-@font-face{font-family:Aldrich;src:url(/fonts/Aldrich.ttf);font-display:swap}
-
-.rr-fixed{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
-.rr-stars{position:absolute;inset:0;background:url(/media/redrock/starfield.png) center/cover no-repeat}
-.rr-globe{position:absolute;left:50%;bottom:26vw;width:0;height:0;transform:scale(.8);transform-origin:0 0}
-.rr-ball{width:40vw;height:40vw;background:url(/media/redrock/centerBall.png) no-repeat center/100% 100%;border-radius:50%;perspective:1200px;transform-style:preserve-3d;position:absolute;left:-20vw;top:-20vw;z-index:2}
-.rr-line{border-radius:50%;position:absolute;border:2px solid #6b7280;transform-style:preserve-3d;left:50%;top:50%}
-.rr-line1{width:62vw;height:62vw;margin-left:-31vw;margin-top:-31vw;top:48%;transform:rotate(45deg) rotateY(96deg)}
-.rr-line2{width:45vw;height:45vw;margin-left:-22.5vw;margin-top:-22.5vw;border:.5px solid #6b7280!important}
-.rr-line3{width:60vw;height:60vw;margin-left:-30vw;margin-top:-30vw;transform:rotateX(82deg)}
-.rr-line1:before,.rr-line2:before,.rr-line3:before,.rr-line3:after{content:"";width:10px;height:10px;border-radius:50%;position:absolute;top:0;left:0;right:0;bottom:0;margin:auto}
-.rr-line1:before{background:#8b8b8b;animation:rr-move1 20s linear infinite}
-.rr-line2:before{background:#9ca3af;animation:rr-move2 10s linear infinite}
-.rr-line3:before{background:#9ca3af;animation:rr-move3 14s linear infinite}
-.rr-line3:after{width:12px;height:12px;background:#b0b0b0;animation:rr-move4 14s linear infinite}
-
-@keyframes rr-move1{0%{transform:rotate(0) translate(31vw) rotate(0) rotateY(-96deg)}to{transform:rotate(360deg) translate(31vw) rotate(-360deg) rotateY(-96deg)}}
-@keyframes rr-move2{0%{transform:rotate(0) translate(22.5vw) rotate(0)}to{transform:rotate(360deg) translate(22.5vw) rotate(-360deg)}}
-@keyframes rr-move3{0%{transform:rotate(0) translateY(30vw) rotate(0) rotateX(-82deg)}to{transform:rotate(360deg) translateY(30vw) rotate(-360deg) rotateX(-82deg)}}
-@keyframes rr-move4{0%{transform:rotate(60deg) translateY(30vw) rotate(-60deg) rotateX(-82deg)}to{transform:rotate(420deg) translateY(30vw) rotate(-420deg) rotateX(-82deg)}}
-
-.rr-pstar{position:absolute;border-radius:50%;background:#FFBCBC;box-shadow:0 0 6px 3px #b08080;z-index:3}
-.rr-wstar{position:absolute;width:.2vw;height:.2vw;border-radius:50%;background:#fff;box-shadow:0 0 4px 2px rgba(255,255,255,.35);animation:rr-twinkle 3.2s ease-in-out infinite}
-@keyframes rr-twinkle{0%,100%{opacity:.15}50%{opacity:1}}
-
-.rr-orbit-text{position:absolute;left:-40vw;top:-40vw;z-index:1;pointer-events:none;user-select:none;animation:rr-spin 30s linear infinite}
-@keyframes rr-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-</style>

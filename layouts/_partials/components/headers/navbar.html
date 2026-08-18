@@ -3,11 +3,12 @@
 {{- $show_logo := site.Params.hugoblox.header.show_logo | default true -}}
 {{- $show_title := site.Params.hugoblox.header.show_title | default true -}}
 {{- $navbar_title := site.Params.hugoblox.header.title | default $branding.name -}}
+{{- $brand_icon := resources.Get "media/icon.png" -}}
 <header id="site-header" class="header">
-  <nav class="navbar px-3 flex justify-start">
+  <nav class="navbar rr-navbar px-3 flex justify-start">
     <div class="order-0 h-full">
       <!-- Brand -->
-      <a class="navbar-brand" href="{{ site.Home.RelPermalink }}" title="{{ $branding.site_title }}">
+      <a class="navbar-brand rr-navbar-brand" href="{{ site.Home.RelPermalink }}" title="{{ $branding.site_title }}">
         {{/* Auto-detect logo from assets/media/logo.{svg,png} */}}
         {{ if $show_logo }}
         {{ with $logo.resource }}
@@ -23,6 +24,17 @@
               src="{{ .RelPermalink }}"
               alt="{{ $branding.name }}" />
           {{ end }}
+        {{ else }}
+          {{ with $brand_icon }}
+            <img
+              fetchpriority="high"
+              decoding="async"
+              class="rr-navbar-brand__icon"
+              width="32"
+              height="32"
+              src="{{ .RelPermalink }}"
+              alt="" />
+          {{ end }}
         {{ end }}
         {{ end }}
         {{/* Display brand name */}}
@@ -33,7 +45,7 @@
     <input id="nav-toggle" type="checkbox" class="hidden" />
     <label
       for="nav-toggle"
-      class="order-3 cursor-pointer flex items-center lg:hidden text-[var(--hb-color-header-fg)] lg:order-1">
+      class="rr-nav-toggle order-3 cursor-pointer flex items-center lg:hidden text-[var(--hb-color-header-fg)] lg:order-1">
       <svg id="show-button" class="h-6 fill-current block" viewBox="0 0 20 20">
         <title>打开菜单</title>
         <path d="M0 3h20v2H0V3z m0 6h20v2H0V9z m0 6h20v2H0V0z"></path>
@@ -51,7 +63,7 @@
     {{ $align_menu := site.Params.hugoblox.header.align | default "center" }}
     <ul
       id="nav-menu"
-      class="navbar-nav order-3 hidden lg:flex w-full pb-6 lg:order-1 lg:w-auto lg:space-x-2 lg:pb-0 xl:space-x-8 justify-start
+      class="rr-nav-menu navbar-nav order-3 hidden lg:flex w-full pb-6 lg:order-1 lg:w-auto lg:space-x-2 lg:pb-0 xl:space-x-8 justify-start
       {{ if in (slice "l" "left") $align_menu }}mr-auto ml-6{{ else if (in (slice "r" "right") $align_menu) }}ml-auto mr-6{{end}}">
       {{ $currentPage := . }}
       {{ range site.Menus.main }}
@@ -126,7 +138,7 @@
       {{ end }}
       {{ end }}
       {{ if site.Params.hugoblox.header.cta.enable }}
-      <li class="mt-4 inline-block lg:hidden">
+      <li class="rr-nav-menu-cta mt-4 inline-block lg:hidden">
         <a
           class=""
           href="{{ site.Params.hugoblox.header.cta.url | relLangURL }}">
@@ -136,7 +148,7 @@
       {{ end }}
     </ul>
 
-    <div class="order-1 ml-auto flex items-center md:order-2 lg:ml-0">
+    <div class="rr-nav-actions order-1 ml-auto flex items-center md:order-2 lg:ml-0">
 
       {{/* Show site search? */}}
       {{ $show_search := site.Params.hugoblox.header.search | default false }}
@@ -213,7 +225,7 @@
       {{ if site.Params.hugoblox.header.cta.enable }}
       <a
         href="{{ site.Params.hugoblox.header.cta.url | relLangURL }}"
-        class="inline-block rounded border px-5 py-2 font-semibold transition
+        class="rr-header-cta inline-block rounded border px-5 py-2 font-semibold transition
         md:ml-4 px-4 py-1.5 text-sm
         border-black  hover:bg-black dark:hover:bg-white dark:hover:text-black hover:text-white dark:border-white dark:text-white dark:hover:bg-white
         hidden lg:inline-block">
