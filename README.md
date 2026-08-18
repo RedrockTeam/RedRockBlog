@@ -1,4 +1,4 @@
-# 红岩博客（RedRock Blog）
+# [红岩博客](https://blog.redrock.team)
 
 RedRock 团队的技术博客：多作者、组件化、纯 Markdown 写作，提交 PR 合并后自动部署上线。
 
