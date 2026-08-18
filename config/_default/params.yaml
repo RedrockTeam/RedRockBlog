@@ -1,10 +1,12 @@
 hugoblox:
   theme:
-    pack: cupcake
+    pack: redrock
     mode: dark
   header:
+    title: Redrock Blog
     theme_picker: false
-    theme_toggle: false
+    theme_toggle: true
     sticky: true
+    search: false
   locale:
     date_format: "2006年1月2日"

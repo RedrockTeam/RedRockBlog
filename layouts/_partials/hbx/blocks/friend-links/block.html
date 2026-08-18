@@ -6,10 +6,17 @@
 {{ $links_raw := index $content "links" }}
 {{ $links := slice }}
 {{ if reflect.IsSlice $links_raw }}{{ $links = $links_raw }}{{ end }}
+{{ $title := index $content "title" | default "名人堂" }}
+{{ $text := index $content "text" }}
 
-<div class="relative py-8 sm:py-10">
+<div class="relative pb-16">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    <header class="rr-page-header">
+      <h1>{{ $title }}</h1>
+      {{ with $text }}<p>{{ . }}</p>{{ end }}
+    </header>
+
+    <div class="rr-friend-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
       {{ range $links }}
       {{ if reflect.IsMap . }}
       {{ $name := "" }}
@@ -56,7 +63,7 @@
       <a href="{{ $url | safeURL }}"
          {{ if $external }}target="_blank" rel="noopener noreferrer"{{ end }}
          aria-label="{{ $name }}"
-         class="group flex items-start gap-4 rounded-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-900/70 backdrop-blur p-5 shadow-sm hover:shadow-md hover:border-primary-300 dark:hover:border-primary-700 hover:-translate-y-0.5 transition-all duration-300">
+         class="rr-friend-card group flex items-start gap-4 p-5 transition-all duration-300">
         <div class="flex-shrink-0">
           {{ if $avatar_url }}
           <span class="relative block h-12 w-12">
@@ -78,8 +85,8 @@
             {{ if $external }}<span class="text-xs text-neutral-400" aria-hidden="true">↗</span>{{ end }}
           </div>
           {{ with $description }}
-          <div class="fl-desc mt-1 overflow-hidden whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-400">
-            <span class="fl-desc-inner inline-block">{{ . }}</span>
+          <div class="fl-desc mt-1 text-sm text-neutral-600 dark:text-neutral-400 line-clamp-2">
+            <span>{{ . }}</span>
           </div>
           {{ end }}
           {{ with $url_host }}
@@ -92,38 +99,3 @@
     </div>
   </div>
 </div>
-
-<style>
-@keyframes fl-marquee {
-  to { transform: translateX(-50%); }
-}
-.fl-scroll .fl-desc-track {
-  display: inline-block;
-  animation: fl-marquee 8s linear infinite;
-}
-.fl-desc-item {
-  display: inline-block;
-  padding-right: 2rem;
-}
-</style>
-<script>
-(function () {
-  var descs = document.querySelectorAll('.fl-desc');
-  for (var i = 0; i < descs.length; i++) {
-    var wrap = descs[i];
-    var inner = wrap.querySelector('.fl-desc-inner');
-    if (!inner || inner.scrollWidth <= wrap.clientWidth) continue;
-    var dup = document.createElement('span');
-    dup.className = 'fl-desc-item';
-    dup.textContent = inner.textContent;
-    dup.setAttribute('aria-hidden', 'true');
-    var track = document.createElement('span');
-    track.className = 'fl-desc-track';
-    inner.className = 'fl-desc-item';
-    track.appendChild(inner);
-    track.appendChild(dup);
-    wrap.appendChild(track);
-    wrap.classList.add('fl-scroll');
-  }
-})();
-</script>

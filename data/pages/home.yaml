@@ -1,30 +1,44 @@
-title: 红岩博客
+title: Redrock Blog
 type: landing
 
 sections:
   - block: hero
+    id: section-hero
     content:
-      title: "红岩博客"
-      text: |
-        RedRock 团队的技术博客
+      title: "Redrock Blog"
+      text: "红岩团队技术博客，收录项目实践、技术笔记与开发记录。"
+    design:
+      size: default
+      layout: centered
+      alignment: left
+      css_class: rr-home-hero
 
-  - block: collection
+  - block: content-collection
+    id: latest-posts
     content:
-      title: "最新文章"
-      count: 5
+      count: 3
       filters:
         folders:
           - blog
+      archive:
+        enable: true
+        text: 所有文章
     design:
       view: article-grid
       columns: 2
+      css_class: rr-home-section
 
-  - block: collection
+  - block: content-collection
+    id: recent-updates
     content:
-      title: "最近日志"
+      title: "更新日志"
       count: 5
       filters:
         folders:
           - log
+      archive:
+        enable: true
+        text: 所有日志
     design:
       view: date-title-summary
+      css_class: rr-home-section rr-home-updates

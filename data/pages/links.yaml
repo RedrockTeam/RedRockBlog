@@ -4,7 +4,10 @@ type: landing
 
 sections:
   - block: friend-links
+    id: community-links
     content:
+      title: "名人堂"
+      text: "连接优秀的技术创作者与社区伙伴。"
       # 每条友链格式：
       # - name: 站点名
       #   url: https://站点地址

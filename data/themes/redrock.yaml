@@ -1,0 +1,41 @@
+# HugoBlox theme pack for Redrock Blog.
+hugoblox:
+  meta:
+    format: "hugoblox-theme@1"
+    name: "RedRock"
+    vendor: "RedRock Team"
+    version: "1.0.0"
+    license: "MIT"
+    description: "Content-first theme for Redrock Blog"
+
+  type: "dual"
+
+  light:
+    colors:
+      primary: "#c94e37"
+      secondary: "#66615a"
+      neutral: "#45423d"
+    surfaces:
+      background: "#f7f6f2"
+      foreground: "#1b1a18"
+      header:
+        background: "#f7f6f2"
+        foreground: "#1b1a18"
+      footer:
+        background: "#f7f6f2"
+        foreground: "#6f6a63"
+
+  dark:
+    colors:
+      primary: "#ef6a4c"
+      secondary: "#b8b4ad"
+      neutral: "#d0cdc7"
+    surfaces:
+      background: "#121212"
+      foreground: "#f1efe9"
+      header:
+        background: "#121212"
+        foreground: "#f1efe9"
+      footer:
+        background: "#121212"
+        foreground: "#96928b"
