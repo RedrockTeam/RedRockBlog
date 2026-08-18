@@ -31,3 +31,7 @@ sections:
           url: https://met6.top/
           description: Stay Hungry. Stay Foolish. 求知若渴，大智若愚。
           image: https://met6.top/res/logo.png
+        - name: 24k的小站
+          url: https://24kblog.top
+          description: 一个平凡的博客
+          image: https://gcore.jsdelivr.net/gh/24kcsplus/home_files@latest/avatar.png
