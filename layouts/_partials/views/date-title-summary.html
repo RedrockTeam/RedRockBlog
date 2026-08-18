@@ -22,11 +22,5 @@
 
     <p class="rr-log-entry__summary">{{ $summary | truncate 160 }}</p>
 
-    <a class="rr-log-entry__link" href="{{ $item.RelPermalink }}">
-      <span>{{ T "read_more" | default "阅读全文" }}</span>
-      <svg aria-hidden="true" viewBox="0 0 16 16" fill="none">
-        <path d="M3 8h9M9 4.5 12.5 8 9 11.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
-      </svg>
-    </a>
   </div>
 </article>

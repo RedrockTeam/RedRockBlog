@@ -6,14 +6,12 @@
 {{ $links_raw := index $content "links" }}
 {{ $links := slice }}
 {{ if reflect.IsSlice $links_raw }}{{ $links = $links_raw }}{{ end }}
-{{ $eyebrow := index $content "eyebrow" | default "COMMUNITY" }}
 {{ $title := index $content "title" | default "名人堂" }}
 {{ $text := index $content "text" }}
 
 <div class="relative pb-16">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <header class="rr-page-header">
-      <p class="rr-page-header__eyebrow">{{ $eyebrow }}</p>
       <h1>{{ $title }}</h1>
       {{ with $text }}<p>{{ . }}</p>{{ end }}
     </header>

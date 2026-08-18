@@ -4,7 +4,6 @@
 <div class="rr-archive-page max-w-screen-lg mx-auto px-6 pb-16">
 
   <header class="rr-page-header">
-    <p class="rr-page-header__eyebrow">AUTHORS</p>
     <h1>{{ .Title }}</h1>
     {{ with .Params.description }}<p>{{ . }}</p>{{ end }}
   </header>
@@ -63,7 +62,7 @@
           </div>
         {{ end }}
 
-        <div class="mt-4 inline-flex items-center gap-1.5 rounded-full bg-primary-100/70 dark:bg-primary-900/30 px-3 py-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <div class="rr-author-card__count mt-4 text-sm">
           <span>{{ $count }}</span>
           <span>篇</span>
         </div>

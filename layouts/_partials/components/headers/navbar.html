@@ -163,9 +163,9 @@
 
       {{ $show_mode_toggle := site.Params.hugoblox.header.theme_toggle | default true }}
       {{ if $show_mode_toggle }}
-      <div class="px-3 text-[var(--hb-color-header-fg)] hover:text-primary-500
+      <div class="rr-theme-toggle-wrap px-3 text-[var(--hb-color-header-fg)] hover:text-primary-500
             [&.active]:font-bold [&.active]:text-primary-500">
-        <button class="theme-toggle mt-1" accesskey="t" title="显示偏好">
+        <button class="theme-toggle mt-1" accesskey="t" title="切换明暗主题" aria-label="切换明暗主题">
           <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                stroke-linejoin="round" class="block dark:hidden">
