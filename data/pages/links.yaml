@@ -38,3 +38,7 @@ sections:
           url: https://24kblog.top
           description: 一个平凡的博客
           image: https://gcore.jsdelivr.net/gh/24kcsplus/home_files@latest/avatar.png
+        - name: Lulaide's Blog
+          url: https://blog.lulaide.com/
+          description: Start from here.
+          image: https://blog.lulaide.com/icon.png
