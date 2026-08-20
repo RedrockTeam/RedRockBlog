@@ -818,12 +818,14 @@ label:focus-visible {
   margin-bottom: 0.8em;
   font-size: 1.7em;
   letter-spacing: -0.035em;
+  scroll-margin-top: 90px;
 }
 
 .prose h3 {
   margin-top: 1.9em;
   font-size: 1.3em;
   letter-spacing: -0.025em;
+  scroll-margin-top: 90px;
 }
 
 .prose p,
@@ -847,6 +849,10 @@ label:focus-visible {
   background: var(--rr-code-bg);
   color: var(--rr-code-text);
   font-size: 0.88em;
+}
+
+.prose [id] {
+  scroll-margin-top: 90px;
 }
 
 .prose pre {
@@ -928,6 +934,7 @@ label:focus-visible {
 .hb-toc > div,
 .page-body > .mx-auto.flex.max-w-screen-xl > .order-first > div {
   margin-top: 20px;
+  top: 20px;
   padding: 14px 0 14px 18px !important;
   border: 0;
   border-left: 1px solid var(--rr-line-strong);
@@ -946,7 +953,18 @@ label:focus-visible {
   border: 0;
   border-top: 1px solid var(--rr-line);
   border-radius: 0;
-  background: transparent;
+ background: transparent;
+}
+
+/* Article footer (tags, author, related, comments) — align with the body column */
+.page-body > .mx-auto.flex.max-w-screen-xl > article > main > .container.mx-auto.prose {
+  max-width: none !important;
+  margin-inline: 0 !important;
+  padding-inline: 0 !important;
+}
+
+.page-body > .mx-auto.flex.max-w-screen-xl > article > main > .container.mx-auto.prose > .max-w-prose {
+  max-width: none !important;
 }
 
 /* Footer */
