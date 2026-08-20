@@ -6,7 +6,7 @@ sections:
     id: section-hero
     content:
       title: "Redrock Blog"
-      text: "红岩团队技术博客，收录项目实践、技术笔记与开发记录。"
+      text: "红岩团队技术博客，收录项目实践、技术笔记与开发记录"
     design:
       size: default
       layout: centered
