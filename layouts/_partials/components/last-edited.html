@@ -13,9 +13,9 @@
   <div class="mt-16"></div>
 {{- end -}}
 
-{{/* 编辑本页：blog section 默认可编辑，也可通过 front matter editable 关闭 */}}
+{{/* 编辑本页：blog 和 log section 默认可编辑，也可通过 front matter editable 关闭 */}}
 {{- $editable := .Params.editable -}}
-{{- if (eq .Section "blog") -}}
+{{- if or (eq .Section "blog") (eq .Section "log") -}}
   {{- $editable = true -}}
 {{- end -}}
 {{- if and $editable .File site.Params.hugoblox.repository.url -}}
