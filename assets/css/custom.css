@@ -123,6 +123,12 @@ label:focus-visible {
   align-items: center;
 }
 
+.rr-navbar-github {
+  position: relative;
+  top: -9px;
+  vertical-align: middle;
+}
+
 .rr-navbar-brand {
   display: inline-flex;
   align-items: center;
