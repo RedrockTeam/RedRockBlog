@@ -14,16 +14,6 @@ sections:
       #   description: 一句话介绍
       #   image: https://站点/头像.png   # 可选；不填自动用站点 /favicon.ico，加载失败再落回首字
       links:
-        - name: Lulaide's Blog
-          added_at: 2026-08-16T10:24:36+08:00
-          url: https://blog.lulaide.com/
-          description: Start from here.
-          image: https://blog.lulaide.com/icon.png
-        - name: 24k的小站
-          added_at: 2026-08-16T23:37:54+08:00
-          url: https://24kblog.top
-          description: 一个平凡的博客
-          image: https://gcore.jsdelivr.net/gh/24kcsplus/home_files@latest/avatar.png
         - name: MeTの主页
           added_at: 2026-08-18T00:35:59+08:00
           url: https://met6.top/
@@ -50,3 +40,13 @@ sections:
           added_at: 2026-08-17T00:28:33+08:00
           url: https://hs.cnies.org
           image: https://gastigado.cnies.org/d/elements/hxcn_transparent_240.png
+        - name: 24k的小站
+          added_at: 2026-08-16T23:37:54+08:00
+          url: https://24kblog.top
+          description: 一个平凡的博客
+          image: https://gcore.jsdelivr.net/gh/24kcsplus/home_files@latest/avatar.png
+        - name: Lulaide's Blog
+          added_at: 2026-08-16T10:24:36+08:00
+          url: https://blog.lulaide.com/
+          description: Start from here.
+          image: https://blog.lulaide.com/icon.png
