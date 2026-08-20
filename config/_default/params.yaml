@@ -10,3 +10,7 @@ hugoblox:
     search: false
   locale:
     date_format: "2006年1月2日"
+  repository:
+    url: https://github.com/RedrockTeam/RedrockBlog
+    branch: main
+    content_dir: content

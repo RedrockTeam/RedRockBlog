@@ -12,3 +12,23 @@
 {{- else -}}
   <div class="mt-16"></div>
 {{- end -}}
+
+{{/* 编辑本页：blog section 默认可编辑，也可通过 front matter editable 关闭 */}}
+{{- $editable := .Params.editable -}}
+{{- if (eq .Section "blog") -}}
+  {{- $editable = true -}}
+{{- end -}}
+{{- if and $editable .File site.Params.hugoblox.repository.url -}}
+  {{ $edit_url := site.Params.hugoblox.repository.url }}
+  {{ $branch := site.Params.hugoblox.repository.branch | default "main" }}
+  {{ $dir := site.Params.hugoblox.repository.content_dir | default "content" }}
+  {{- with .File -}}
+    {{- $edit_url = urls.JoinPath $edit_url "edit" $branch $dir (replace .Path "\\" "/") -}}
+  {{- end -}}
+  {{- with .Params.edit_url -}}{{ $edit_url = . }}{{- end -}}
+  <p class="edit-page mb-8 ltr:text-right rtl:text-left">
+    <a class="text-xs font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100" href="{{ $edit_url }}" target="_blank" rel="noopener">
+      {{ T "edit_page" | default "Edit this page" }}
+    </a>
+  </p>
+{{- end -}}
