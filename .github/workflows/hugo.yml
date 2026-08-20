@@ -98,6 +98,9 @@ jobs:
       - name: Generate first-commit dates (temporary)
         run: python .github/scripts/generate_commit_dates.py
 
+      - name: Reorder friend links by added_at (temporary)
+        run: python .github/scripts/order_friend_links.py
+
       - name: Build
         env:
           HUGO_CACHEDIR: ${{ runner.temp }}/hugo_cache
