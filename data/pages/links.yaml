@@ -29,6 +29,11 @@ sections:
           url: https://met6.top/
           description: Stay Hungry. Stay Foolish. 求知若渴，大智若愚。
           image: https://met6.top/res/logo.png
+        - name: 补络阁
+          added_at: 2026-08-18T00:28:33+08:00
+          url: https://blog.tuf3i.cc
+          description: 咕咕嘎嘎，咕咕嘎嘎...
+          image: https://oss.tuf3i.cc/blog/profile/avatar.png
         - name: Losita's Blog
           added_at: 2026-08-17T00:28:33+08:00
           url: https://blog.lecspace.com
@@ -45,8 +50,3 @@ sections:
           added_at: 2026-08-17T00:28:33+08:00
           url: https://hs.cnies.org
           image: https://gastigado.cnies.org/d/elements/hxcn_transparent_240.png
-        - name: 补络阁
-          added_at: 2026-08-18T00:28:33+08:00
-          url: https://blog.tuf3i.cc
-          description: 咕咕嘎嘎，咕咕嘎嘎...
-          image: https://oss.tuf3i.cc/blog/profile/avatar.png
