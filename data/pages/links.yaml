@@ -12,6 +12,7 @@ sections:
       # - name: 站点名
       #   url: https://站点地址
       #   description: 一句话介绍
+      #   added_at：添加时间  #可选，建议不写通过cicd自动填充
       #   image: https://站点/头像.png   # 可选；不填自动用站点 /favicon.ico，加载失败再落回首字
       links:
         - name: MeTの主页
