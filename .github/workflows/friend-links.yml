@@ -1,0 +1,90 @@
+name: Sync Friend Link Order from Git
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'data/pages/links.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+# 防止多个 PR 合并后并发推送互相冲突
+concurrency:
+  group: friend-links
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  sync-links:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Inject added_at and reorder
+        run: python .github/scripts/order_friend_links.py
+
+      # 分支保护启用后 GITHUB_TOKEN 无法直接推 main，改用 GitHub App token（App 已加入绕过名单）
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: RedrockTeam
+          repositories: RedRockBlog
+
+      # App token 推送会触发工作流，提交消息带 [skip ci] 防止递归；回写才能让排序落库
+      - name: Commit reordered links to main
+        id: commit-links
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          git add data/pages/links.yaml
+          if git diff --cached --quiet; then
+            echo "友链 added_at 与顺序已一致，无需提交"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: 自动注入友链添加时间并排序[skip ci]"
+          git remote set-url origin "https://x-access-token:${APP_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          # 多个回写工作流并行时可能撞车，失败自动变基重试
+          ok=0
+          for attempt in 1 2 3 4 5; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              ok=1
+              break
+            fi
+            echo "第 ${attempt} 次推送失败，2 秒后重试..."
+            sleep 2
+          done
+          if [ "$ok" != "1" ]; then
+            echo "连续 5 次推送失败，退出"
+            exit 1
+          fi
+          echo "deploy=true" >> "$GITHUB_OUTPUT"
+
+      # 回写提交本身不会触发新的 workflow run，这里手动调度部署让排序立即上线
+      - name: Trigger deploy
+        if: steps.commit-links.outputs.deploy == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run hugo.yml --ref main

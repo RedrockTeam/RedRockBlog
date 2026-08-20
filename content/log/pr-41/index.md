@@ -1,7 +1,7 @@
 ---
 title: 名人堂（友链）页面与添加指南
 date: 2026-08-17T00:30:00+0800
-summary: '## 改动内容'
+summary: '新增名人堂（友链）页面与“怎么加友链”指南，支持 URL 头像与失败回退'
 pr: 41
 ---
 
@@ -11,9 +11,5 @@ pr: 41
 - 导航栏加入口，当前收录 6 个站点
 - 新增《名人堂怎么加友链》指南
 - 作者档案移除 affiliations 字段支持与文档说明
-
-## 验证
-
-- hugo build --gc --minify 通过
 
 来源：[PR #41](https://github.com/RedrockTeam/RedRockBlog/pull/41)
