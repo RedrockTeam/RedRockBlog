@@ -1,0 +1,6 @@
+{{/* 共享页面头部：统一所有页面的标题位置和容器宽度 */}}
+<header class="rr-page-header">
+  <h1>{{ .title }}</h1>
+  {{ with .description }}<p>{{ . }}</p>{{ end }}
+  {{ with .actions }}{{ . | safeHTML }}{{ end }}
+</header>

@@ -317,7 +317,10 @@ label:focus-visible {
 }
 
 .rr-home-section > .flex.flex-col.items-center.px-6 {
-  width: 100%;
+  width: min(100%, 1320px);
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 56px 24px 56px;
 }
 
 .rr-home-section > .container {
@@ -404,6 +407,8 @@ label:focus-visible {
 }
 
 .rr-section-heading {
+  max-width: 1320px;
+  margin-inline: auto;
   padding-top: 42px;
 }
 
@@ -676,6 +681,11 @@ label:focus-visible {
 }
 
 /* Authors */
+.rr-author-wrap {
+  max-width: 1320px;
+  margin-inline: auto;
+}
+
 .rr-author-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -719,7 +729,9 @@ label:focus-visible {
 }
 
 .rr-author-profile {
-  padding-top: 56px;
+  max-width: 1320px;
+  margin-inline: auto;
+  padding-top: 64px;
 }
 
 .rr-author-profile > div {
@@ -741,9 +753,26 @@ label:focus-visible {
 }
 
 /* Community links */
+.rr-friend-wrap {
+  max-width: 1320px;
+  margin-inline: auto;
+}
+
 .rr-friend-grid {
+  padding: 0 24px;
   gap: 0 !important;
   border-top: 1px solid var(--rr-line);
+}
+
+/* 名人堂：去掉 landing section 默认间距，由 .rr-page-header 统一控制 */
+#community-links.hbb-section {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* 名人堂属于 landing 类型，主题不会自动加 my-10，这里手动补齐与列表页相同的顶部间距 */
+.page-body:has(#community-links) {
+  margin-top: 2.5rem;
 }
 
 .rr-friend-card {
@@ -782,7 +811,7 @@ label:focus-visible {
 .page-body > .mx-auto.flex.max-w-screen-xl {
   width: min(100%, 1520px);
   max-width: 1520px !important;
-  padding: 48px 24px 80px;
+  padding: 44px 24px 80px;
   align-items: flex-start;
 }
 
@@ -1253,6 +1282,10 @@ label:focus-visible {
     padding: 0 20px 42px;
   }
 
+  .rr-home-section > .flex.flex-col.items-center.px-6 {
+    padding: 44px 20px 42px;
+  }
+
   .rr-log-panel {
     padding: 0 20px 38px !important;
   }
@@ -1283,7 +1316,7 @@ label:focus-visible {
   }
 
   .rr-author-profile {
-    padding: 44px 20px 0;
+    padding: 46px 20px 0;
   }
 
   .rr-author-profile > div {
@@ -1292,6 +1325,7 @@ label:focus-visible {
 
   .rr-friend-grid {
     grid-template-columns: minmax(0, 1fr) !important;
+    padding: 0 20px;
   }
 
   .rr-friend-card,
@@ -1301,7 +1335,7 @@ label:focus-visible {
   }
 
   .page-body > .mx-auto.flex.max-w-screen-xl {
-    padding: 28px 0 52px;
+    padding: 22px 0 52px;
   }
 
   .page-body > .mx-auto.flex.max-w-screen-xl > article > main {

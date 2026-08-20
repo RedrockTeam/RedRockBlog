@@ -31,7 +31,6 @@ sections:
   - block: content-collection
     id: recent-updates
     content:
-      title: "更新日志"
       count: 5
       filters:
         folders:
