@@ -19,6 +19,13 @@
   <header class="rr-page-header">
     <h1>{{ .Title }}</h1>
     {{ with .Params.description }}<p>{{ . }}</p>{{ end }}
+    {{ with site.Params.hugoblox.repository.url }}
+    {{ $new_url := urls.JoinPath . "new" (site.Params.hugoblox.repository.branch | default "main") (site.Params.hugoblox.repository.content_dir | default "content") "log" }}
+    {{ $new_url = printf "%s?filename=new/index.md" $new_url }}
+    <a href="{{ $new_url }}" target="_blank" rel="noopener" class="rr-write-btn">
+      写新日志
+    </a>
+    {{ end }}
   </header>
 
   <div class="rr-log-panel w-full max-w-4xl mx-auto px-6">
