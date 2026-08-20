@@ -123,6 +123,12 @@ label:focus-visible {
   align-items: center;
 }
 
+.rr-navbar-github {
+  position: relative;
+  top: -9px;
+  vertical-align: middle;
+}
+
 .rr-navbar-brand {
   display: inline-flex;
   align-items: center;
@@ -818,12 +824,14 @@ label:focus-visible {
   margin-bottom: 0.8em;
   font-size: 1.7em;
   letter-spacing: -0.035em;
+  scroll-margin-top: 90px;
 }
 
 .prose h3 {
   margin-top: 1.9em;
   font-size: 1.3em;
   letter-spacing: -0.025em;
+  scroll-margin-top: 90px;
 }
 
 .prose p,
@@ -847,6 +855,10 @@ label:focus-visible {
   background: var(--rr-code-bg);
   color: var(--rr-code-text);
   font-size: 0.88em;
+}
+
+.prose [id] {
+  scroll-margin-top: 90px;
 }
 
 .prose pre {
@@ -928,16 +940,55 @@ label:focus-visible {
 .hb-toc > div,
 .page-body > .mx-auto.flex.max-w-screen-xl > .order-first > div {
   margin-top: 20px;
-  padding: 14px 0 14px 18px !important;
+  top: 20px;
+  padding: 14px 18px 14px 0 !important;
   border: 0;
-  border-left: 1px solid var(--rr-line-strong);
+  border-right: 1px solid var(--rr-line-strong);
   border-radius: 0;
   background: transparent;
+}
+
+/* Right TOC keeps its divider on the left side, facing the article */
+.hb-toc > div {
+  padding: 14px 0 14px 18px !important;
+  border-right: 0;
+  border-left: 1px solid var(--rr-line-strong);
 }
 
 .hb-toc p,
 .page-body > .mx-auto.flex.max-w-screen-xl > .order-first p {
   color: var(--rr-text);
+}
+
+/* Pin the left author column and right TOC to the viewport so they stay visible while scrolling */
+@media (min-width: 1280px) {
+  .page-body > .mx-auto.flex.max-w-screen-xl > .order-first,
+  .page-body > .mx-auto.flex.max-w-screen-xl > .hb-toc {
+    position: fixed;
+    top: calc(var(--navbar-height) + 20px);
+    bottom: 0;
+    width: 256px;
+  }
+
+  .page-body > .mx-auto.flex.max-w-screen-xl > .order-first {
+    left: calc(50% - 760px + 24px);
+  }
+
+  .page-body > .mx-auto.flex.max-w-screen-xl > .hb-toc {
+    right: calc(50% - 760px + 24px);
+  }
+
+  .page-body > .mx-auto.flex.max-w-screen-xl > .order-first > div,
+  .page-body > .mx-auto.flex.max-w-screen-xl > .hb-toc > div {
+    top: 0;
+    margin-top: 0;
+    max-height: calc(100vh - var(--navbar-height) - 40px - env(safe-area-inset-bottom));
+  }
+
+  /* Reclaim the space the two fixed columns occupied so the article keeps its place */
+  .page-body > .mx-auto.flex.max-w-screen-xl > article {
+    margin-inline: 256px;
+  }
 }
 
 .rr-inline-author {
@@ -946,7 +997,18 @@ label:focus-visible {
   border: 0;
   border-top: 1px solid var(--rr-line);
   border-radius: 0;
-  background: transparent;
+ background: transparent;
+}
+
+/* Article footer (tags, author, related, comments) — align with the body column */
+.page-body > .mx-auto.flex.max-w-screen-xl > article > main > .container.mx-auto.prose {
+  max-width: none !important;
+  margin-inline: 0 !important;
+  padding-inline: 0 !important;
+}
+
+.page-body > .mx-auto.flex.max-w-screen-xl > article > main > .container.mx-auto.prose > .max-w-prose {
+  max-width: none !important;
 }
 
 /* Footer */
