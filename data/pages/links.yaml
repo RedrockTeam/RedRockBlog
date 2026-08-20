@@ -15,12 +15,12 @@ sections:
       #   image: https://站点/头像.png   # 可选；不填自动用站点 /favicon.ico，加载失败再落回首字
       links:
         - name: Lulaide's Blog
-          added_at: 2026-08-20T10:24:36+08:00
+          added_at: 2026-08-16T10:24:36+08:00
           url: https://blog.lulaide.com/
           description: Start from here.
           image: https://blog.lulaide.com/icon.png
         - name: 24k的小站
-          added_at: 2026-08-18T23:37:54+08:00
+          added_at: 2026-08-16T23:37:54+08:00
           url: https://24kblog.top
           description: 一个平凡的博客
           image: https://gcore.jsdelivr.net/gh/24kcsplus/home_files@latest/avatar.png
