@@ -69,6 +69,15 @@
           {{ partial "social_links" (dict "Params" (dict "profiles" $profile.links)) }}
         </div>
       {{ end }}
+
+      {{ with site.Params.hugoblox.repository.url }}
+      {{ $edit_url := urls.JoinPath . "edit" (site.Params.hugoblox.repository.branch | default "main") "data" "authors" (printf "%s.yaml" ($slug | urlize)) }}
+      <p class="edit-page mt-4">
+        <a class="text-xs font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100" href="{{ $edit_url }}" target="_blank" rel="noopener">
+          {{ T "edit_page" | default "Edit this page" }}
+        </a>
+      </p>
+      {{ end }}
     </div>
   </div>
 </section>
