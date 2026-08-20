@@ -384,6 +384,25 @@ label:focus-visible {
   line-height: 1.75;
 }
 
+.rr-write-btn {
+  display: inline-block;
+  margin-top: 24px;
+  padding: 7px 18px;
+  border: 1px solid var(--rr-line-strong);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--rr-text-body);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+
+.rr-write-btn:hover {
+  border-color: var(--rr-accent);
+  color: var(--rr-accent);
+}
+
 .rr-section-heading {
   padding-top: 42px;
 }
