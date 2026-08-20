@@ -32,14 +32,6 @@ sections:
           added_at: 2026-08-17T00:28:33+08:00
           url: https://blog.rycarl.cn
           image: https://blog.rycarl.cn/upload/EcoPaste_zLyAZdKQq89-m_far7hZU.png
-        - name: Snowykami's Blog
-          added_at: 2026-08-15T00:28:33+08:00
-          url: https://blog.sfkm.me
-          image: https://cdn.liteyuki.org/snowykami/avatar_alpha.png
-        - name: 萑澈的寒舍
-          added_at: 2026-08-15T00:28:33+08:00
-          url: https://hs.cnies.org
-          image: https://gastigado.cnies.org/d/elements/hxcn_transparent_240.png
         - name: 24k的小站
           added_at: 2026-08-16T23:37:54+08:00
           url: https://24kblog.top
@@ -50,3 +42,11 @@ sections:
           url: https://blog.lulaide.com/
           description: Start from here.
           image: https://blog.lulaide.com/icon.png
+        - name: Snowykami's Blog
+          added_at: 2026-08-15T00:28:33+08:00
+          url: https://blog.sfkm.me
+          image: https://cdn.liteyuki.org/snowykami/avatar_alpha.png
+        - name: 萑澈的寒舍
+          added_at: 2026-08-15T00:28:33+08:00
+          url: https://hs.cnies.org
+          image: https://gastigado.cnies.org/d/elements/hxcn_transparent_240.png
