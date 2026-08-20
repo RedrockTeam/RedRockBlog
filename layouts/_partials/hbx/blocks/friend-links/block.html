@@ -10,19 +10,13 @@
 {{ $text := index $content "text" }}
 
 <div class="relative pb-16">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <header class="rr-page-header">
-      <h1>{{ $title }}</h1>
-      {{ with $text }}<p>{{ . }}</p>{{ end }}
-      {{ with site.Params.hugoblox.repository.url }}
-      {{ $edit_url := urls.JoinPath . "edit" (site.Params.hugoblox.repository.branch | default "main") "data" "pages" "links.yaml" }}
-      <p class="edit-page mt-4">
-        <a class="text-xs font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100" href="{{ $edit_url }}" target="_blank" rel="noopener">
-          {{ T "edit_page" | default "Edit this page" }}
-        </a>
-      </p>
-      {{ end }}
-    </header>
+  <div class="rr-friend-wrap">
+  {{ $actions := "" }}
+  {{ with site.Params.hugoblox.repository.url }}
+  {{ $edit_url := urls.JoinPath . "edit" (site.Params.hugoblox.repository.branch | default "main") "data" "pages" "links.yaml" }}
+  {{ $actions = printf `<a href="%s" target="_blank" rel="noopener" class="rr-write-btn">%s</a>` $edit_url (T "edit_page" | default "Edit this page") }}
+  {{ end }}
+  {{ partial "components/page-header" (dict "title" $title "description" $text "actions" $actions) }}
 
     <div class="rr-friend-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
       {{ range $links }}
